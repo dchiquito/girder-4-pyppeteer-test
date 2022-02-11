@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "girder-pytest-pyppeteer"
+version = "0.0.1"
+description = "Pytest plugin for using pyppeteer to test Girder 4 applications"
+authors = ["Daniel Chiquito <daniel.chiquito@kitware.com>"]
+license = "Apache License 2.0"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pytest = "^7.0.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

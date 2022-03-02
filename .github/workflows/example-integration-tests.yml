@@ -1,4 +1,4 @@
-name: ci
+name: Example integration tests
 on:
   pull_request:
   push:
@@ -42,6 +42,7 @@ jobs:
       - name: Run tests
         run: |
           tox -e test-pyppeteer
+        uses: docker://ghcr.io/dchiquito/pytest-pyppeteer:latest
         working-directory: test-app
         env:
           DJANGO_DATABASE_URL: postgres://postgres:postgres@localhost:5432/django

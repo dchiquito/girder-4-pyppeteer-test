@@ -42,6 +42,7 @@ jobs:
       - name: Run tests
         run: |
           tox
+        working-directory: test-app
         env:
           DJANGO_DATABASE_URL: postgres://postgres:postgres@localhost:5432/django
           DJANGO_MINIO_STORAGE_ENDPOINT: localhost:9000

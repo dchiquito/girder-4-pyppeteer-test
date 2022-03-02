@@ -42,7 +42,7 @@ jobs:
       - name: Run tests
         uses: docker://ghcr.io/dchiquito/pytest-pyppeteer:latest
         with:
-          install_command: echo "Hello!"
+          install_command: pwd && ls
           test_command: tox -e test-pyppeteer
           working-directory: test-app
         env:

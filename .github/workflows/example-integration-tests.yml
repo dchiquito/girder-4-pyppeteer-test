@@ -42,9 +42,9 @@ jobs:
       - name: Run tests
         uses: docker://ghcr.io/dchiquito/pytest-pyppeteer:latest
         with:
-          entrypoint:
-            tox -e test-pyppeteer
-        working-directory: test-app
+          install_command: echo "Hello!"
+          test_command: tox -e test-pyppeteer
+          working-directory: test-app
         env:
           DJANGO_DATABASE_URL: postgres://postgres:postgres@localhost:5432/django
           DJANGO_MINIO_STORAGE_ENDPOINT: localhost:9000

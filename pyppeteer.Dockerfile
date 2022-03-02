@@ -58,10 +58,12 @@ RUN pip install \
     whitenoise \
     # Definitely only miqa
     pandas \
-    schema
+    schema \
+    # tox
+    tox
 
 ENV DJANGO_ALLOW_ASYNC_UNSAFE=true
 
 RUN pyppeteer-install
 
-WORKDIR /opt/django-project
+ENTRYPOINT ./execute-test-command.sh

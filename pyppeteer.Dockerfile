@@ -66,4 +66,6 @@ ENV DJANGO_ALLOW_ASYNC_UNSAFE=true
 
 RUN pyppeteer-install
 
+COPY execute-test-command.sh execute-test-command.sh
+
 ENTRYPOINT ./execute-test-command.sh

@@ -40,9 +40,10 @@ jobs:
           pip install --upgrade pip
           pip install tox
       - name: Run tests
-        run: |
-          tox -e test-pyppeteer
         uses: docker://ghcr.io/dchiquito/pytest-pyppeteer:latest
+        with:
+          entrypoint:
+            tox -e test-pyppeteer
         working-directory: test-app
         env:
           DJANGO_DATABASE_URL: postgres://postgres:postgres@localhost:5432/django

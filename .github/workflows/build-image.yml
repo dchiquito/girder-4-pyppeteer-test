@@ -12,6 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build the docker image
-        run: docker build . --file pyppeteer.Dockerfile --tag pytest-pyppeteer:latest
+        run: docker build . --file pyppeteer.Dockerfile --tag ghcr.io/dchiquito/pytest-pyppeteer:latest
       - name: Upload the docker image to GitHub Container Registry
         run: docker push ghcr.io/dchiquito/pytest-pyppeteer:latest

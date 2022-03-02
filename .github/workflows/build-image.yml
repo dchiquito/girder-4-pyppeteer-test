@@ -1,0 +1,17 @@
+name: Build image
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build the docker image
+        run: docker build . --file pyppeteer.Dockerfile --tag pytest-pyppeteer:latest
+      - name: Upload the docker image to GitHub Container Registry
+        run: docker push ghcr.io/dchiquito/pytest-pyppeteer:latest

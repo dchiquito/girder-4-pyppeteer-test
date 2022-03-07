@@ -1,9 +1,7 @@
 FROM python:3.8-slim
 # Install system libraries for Python packages:
 # * psycopg2
-# Remove cmdtest, which also defines yarn
-RUN apt-get remove -y cmdtest yarn && \
-    apt-get update && \
+RUN apt-get update && \
     apt-get install --no-install-recommends --yes \
         libpq-dev gcc libc6-dev \
         # Required to run the dev server
@@ -11,6 +9,8 @@ RUN apt-get remove -y cmdtest yarn && \
         # Required by pyppeteer
         chromium libxcursor1 libxss1 libpangocairo-1.0-0 libgtk-3-0 && \
     rm -rf /var/lib/apt/lists/*
+# Install yarn
+RUN npm instal --global yarn && yarn --version
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1

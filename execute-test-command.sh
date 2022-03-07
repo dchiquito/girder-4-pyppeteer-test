@@ -12,4 +12,3 @@ echo "yarn version:"
 yarn --version
 echo "Running tests with $INPUT_TEST_COMMAND"
 $INPUT_TEST_COMMAND
-echo "Complete!"

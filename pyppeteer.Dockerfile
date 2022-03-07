@@ -5,7 +5,7 @@ RUN apt-get update && \
     apt-get install --no-install-recommends --yes \
         libpq-dev gcc libc6-dev \
         # Required to run the dev server
-        npm yarn \
+        npm \
         # Required by pyppeteer
         chromium libxcursor1 libxss1 libpangocairo-1.0-0 libgtk-3-0 && \
     rm -rf /var/lib/apt/lists/*

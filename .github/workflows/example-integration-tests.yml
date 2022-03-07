@@ -42,6 +42,7 @@ jobs:
       - name: Run tests
         uses: docker://ghcr.io/dchiquito/pytest-pyppeteer:latest
         with:
+          working_directory: test-app
           install_command: pwd && ls && cd $GITHUB_WORKSPACE && pwd && ls
           test_command: tox -e test-pyppeteer
         env:

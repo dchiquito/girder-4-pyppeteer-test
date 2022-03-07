@@ -4,10 +4,14 @@ FROM python:3.8-slim
 RUN apt-get update && \
     apt-get install --no-install-recommends --yes \
         libpq-dev gcc libc6-dev \
-        # Required to run the dev server
-        npm \
+        # Required to install node
+        curl gnupg \
         # Required by pyppeteer
         chromium libxcursor1 libxss1 libpangocairo-1.0-0 libgtk-3-0 && \
+    # Install node 17
+    curl -sL https://deb.nodesource.com/setup_17.x  | bash - && \
+    apt-get install --no-install-recommends --yes \
+        nodejs
     rm -rf /var/lib/apt/lists/*
 # Install yarn in case projects are using that to launch dev server
 RUN npm install --global yarn

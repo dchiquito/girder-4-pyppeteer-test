@@ -29,7 +29,8 @@ ENV DJANGO_ALLOW_ASYNC_UNSAFE=true
 # WORKDIR /opt/django-project
 
 # Tests should always be run with tox, so that is the only dependency installed now
-RUN pip install tox
+# We also install pyppeteer so we can pre-install chromium easily
+RUN pip install tox pyppeteer
 
 RUN pyppeteer-install
 

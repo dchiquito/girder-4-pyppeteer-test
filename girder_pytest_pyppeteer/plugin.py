@@ -51,26 +51,26 @@ def webpack_server(_pyppeteer_config, live_server):
         'VUE_APP_API_URL': f'{live_server.url}/api/v1',
         'VUE_APP_OAUTH_API_ROOT': f'{live_server.url}/oauth/',
     }
-    
+
     process = Popen(
         # ['/usr/bin/env', 'npm', 'run', 'serve', '--', '--https'],
         # ['/usr/bin/env', 'yarn', 'run', 'serve'],
         # cwd='../test-client',
-        shlex.split(_pyppeteer_config['PYPPETEER_TEST_CLIENT_COMMAND']),
+        ['/usr/bin/env'] + shlex.split(_pyppeteer_config['PYPPETEER_TEST_CLIENT_COMMAND']),
         cwd=_pyppeteer_config['PYPPETEER_TEST_CLIENT_DIR'],
         env=env,
         stdout=PIPE,
         stderr=PIPE,
         preexec_fn=os.setsid,
-        shell=True,
     )
     try:
         # Wait until the server starts by polling stdout
         max_timeout = 60
         retry_interval = 3
+        err = b''
         for _ in range(0, max_timeout // retry_interval):
             try:
-                process.communicate(timeout=retry_interval)
+                _out, err = process.communicate(timeout=retry_interval)
             except TimeoutExpired as e:
                 if match := re.search(
                     b'App running at:\n  - Local:   (http[s]?://[a-z]+:[0-9]+/?) \n', e.stdout
@@ -78,12 +78,16 @@ def webpack_server(_pyppeteer_config, live_server):
                     url = match.group(1).decode('utf-8')
                     break
         else:
-            raise Exception('webpack server failed to start')
+            raise Exception(f'webpack server failed to start: {err}')
         yield url
     finally:
         # Kill every process in the webpack server's process group
-        os.killpg(os.getpgid(process.pid), signal.SIGTERM)
-        # TODO set up some signal handlers to ensure it always gets cleaned up
+        try:
+            os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+            # TODO set up some signal handlers to ensure it always gets cleaned up
+        except ProcessLookupError:
+            # The process has already terminated, no need to intervene
+            pass
 
 
 # @pytest.fixture

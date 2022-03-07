@@ -52,11 +52,10 @@ def webpack_server(_pyppeteer_config, live_server):
         'VUE_APP_OAUTH_API_ROOT': f'{live_server.url}/oauth/',
     }
 
+    command = ['/usr/bin/env'] + shlex.split(_pyppeteer_config['PYPPETEER_TEST_CLIENT_COMMAND'])
+    print(f'Launching node server with {command}')
     process = Popen(
-        # ['/usr/bin/env', 'npm', 'run', 'serve', '--', '--https'],
-        # ['/usr/bin/env', 'yarn', 'run', 'serve'],
-        # cwd='../test-client',
-        ['/usr/bin/env'] + shlex.split(_pyppeteer_config['PYPPETEER_TEST_CLIENT_COMMAND']),
+        command,
         cwd=_pyppeteer_config['PYPPETEER_TEST_CLIENT_DIR'],
         env=env,
         stdout=PIPE,

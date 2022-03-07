@@ -11,7 +11,7 @@ RUN apt-get update && \
     # Install node 17
     curl -sL https://deb.nodesource.com/setup_17.x  | bash - && \
     apt-get install --no-install-recommends --yes \
-        nodejs
+        nodejs && \
     rm -rf /var/lib/apt/lists/*
 # Install yarn in case projects are using that to launch dev server
 RUN npm install --global yarn

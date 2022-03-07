@@ -9,11 +9,14 @@ RUN apt-get update && \
         # Required by pyppeteer
         chromium libxcursor1 libxss1 libpangocairo-1.0-0 libgtk-3-0 && \
     rm -rf /var/lib/apt/lists/*
-# Install yarn
-RUN npm instal --global yarn && yarn --version
+# Install yarn in case projects are using that to launch dev server
+RUN npm install --global yarn
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+
+# Required to allow async tests in Django
+ENV DJANGO_ALLOW_ASYNC_UNSAFE=true
 
 # # Only copy the setup.py, it will still force all install_requires to be installed,
 # # but find_packages() will find nothing (which is fine). When Docker Compose mounts the real source
@@ -25,46 +28,8 @@ ENV PYTHONUNBUFFERED 1
 # # Use a directory name which will never be an import name, as isort considers this as first-party.
 # WORKDIR /opt/django-project
 
-RUN pip install \
-    # Standard django dependencies
-    celery \
-    django \
-    django-allauth \
-    django-composed-configuration \
-    django-configurations[database,email] \
-    django-extensions \
-    django-filter \
-    django-oauth-toolkit \
-    djangorestframework \
-    django-click \
-    django-guardian \
-    drf-yasg \
-    uri \
-    # Standard test dependencies
-    factory-boy \
-    pytest \
-    pytest-django \
-    pytest-factoryboy \
-    pytest-mock \
-    # pyppeteer dependencies
-    pytest-asyncio \
-    pyppeteer \
-    # Some extras?
-    django-cors-headers \
-    django-debug-toolbar \
-    django-girder-style \
-    django-girder-utils \
-    django-s3-file-field[minio,s3] \
-    psycopg2 \
-    rich \
-    whitenoise \
-    # Definitely only miqa
-    pandas \
-    schema \
-    # tox
-    tox
-
-ENV DJANGO_ALLOW_ASYNC_UNSAFE=true
+# Tests should always be run with tox, so that is the only dependency installed now
+RUN pip install tox
 
 RUN pyppeteer-install
 

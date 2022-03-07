@@ -1,7 +1,9 @@
 FROM python:3.8-slim
 # Install system libraries for Python packages:
 # * psycopg2
-RUN apt-get update && \
+# Remove cmdtest, which also defines yarn
+RUN apt-get remove -y cmdtest yarn && \
+    apt-get update && \
     apt-get install --no-install-recommends --yes \
         libpq-dev gcc libc6-dev \
         # Required to run the dev server

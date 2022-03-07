@@ -62,6 +62,7 @@ def webpack_server(_pyppeteer_config, live_server):
         stdout=PIPE,
         stderr=PIPE,
         preexec_fn=os.setsid,
+        shell=True,
     )
     try:
         # Wait until the server starts by polling stdout

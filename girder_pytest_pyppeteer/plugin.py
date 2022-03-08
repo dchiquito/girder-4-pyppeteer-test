@@ -95,25 +95,34 @@ def webpack_server(_pyppeteer_config, live_server):
 #     return webpack_server
 
 
+
 @pytest.fixture
 async def page(live_server, client, user):
     try:
         import pyppeteer
+        from pyppeteer.launcher import Launcher
         from pyppeteer.errors import BrowserError
         import pytest_asyncio
     except ModuleNotFoundError as e:
         pytest.skip(f'{e.name} not found')
     client.force_login(user)
     sessionid = client.cookies['sessionid'].value
+    launch_kwargs = {
+        'ignoreHTTPSErrors':True,
+        'headless':True,
+        'defaultViewport':{'width': 1024, 'height': 800},
+        'args': ['--no-sandbox'],
+        'dumpio': True,
+    }
+    launcher = Launcher(**launch_kwargs)
     try:
-        browser = await pyppeteer.launch(
-            ignoreHTTPSErrors=True,
-            headless=True,
-            defaultViewport={'width': 1024, 'height': 800},
-            args=['--no-sandbox'],
-        )
+        browser = await launcher.launch()
     except BrowserError as e:
-        # TODO log the invocation that failed using Launcher(**kwargs).cmd
+        launch_command = ' '.join(launcher.cmd)
+        log.error(f'The pyppeteer browser failed to launch.')
+        log.error(f'You may be able to get more information on the error by starting the browser process yourself:')
+        log.error(launch_command)
+
         raise e
     page = await browser.newPage()
     await page.setCookie(

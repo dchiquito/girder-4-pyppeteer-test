@@ -39,7 +39,7 @@ jobs:
           test_directory: test-app
           test_command: tox -e test-pyppeteer
         env:
-          DJANGO_DATABASE_URL: postgres://postgres:postgres@localhost:5432/django
-          DJANGO_MINIO_STORAGE_ENDPOINT: localhost:9000
+          DJANGO_DATABASE_URL: postgres://postgres:postgres@postgres:5432/django
+          DJANGO_MINIO_STORAGE_ENDPOINT: minio:9000
           DJANGO_MINIO_STORAGE_ACCESS_KEY: minioAccessKey
           DJANGO_MINIO_STORAGE_SECRET_KEY: minioSecretKey

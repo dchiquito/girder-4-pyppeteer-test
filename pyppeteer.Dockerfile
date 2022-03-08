@@ -14,9 +14,8 @@ RUN apt-get update && \
         nodejs && \
     rm -rf /var/lib/apt/lists/*
 # Install yarn in case projects are using that to launch dev server
-RUN npm install --global yarn && \
-    # Install Vue CLI for the webpack server
-    yarn global add @vue/cli
+# Install Vue CLI + Vue CLI service for the webpack server
+RUN npm install --global yarn @vue/cli @vue/cli-service
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1

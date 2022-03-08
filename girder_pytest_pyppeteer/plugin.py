@@ -1,13 +1,13 @@
 import os
 
+import logging
 import pytest
 import re
 import shlex
 import signal
 from subprocess import PIPE, Popen, TimeoutExpired
 
-# def pytest_configure(config) -> None:
-#     config.addinivalue_line("markers", "options(kwargs): update browser initial options.")
+log = logging.getLogger('pytest-pyppeteer')
 
 def pytest_addoption(parser, pluginmanager):
     parser.addoption(
@@ -53,7 +53,7 @@ def webpack_server(_pyppeteer_config, live_server):
     }
 
     command = ['/usr/bin/env'] + shlex.split(_pyppeteer_config['PYPPETEER_TEST_CLIENT_COMMAND'])
-    print(f'Launching node server with {command}')
+    log.debug(f'Launching node server with {command}')
     process = Popen(
         command,
         cwd=_pyppeteer_config['PYPPETEER_TEST_CLIENT_DIR'],
@@ -126,8 +126,8 @@ async def page(live_server, client, user):
     )
 
     @page.on('console')
-    def console_log_handler(message):
-        print('AAAH', message.type, message.args, message.text)
+    def _console_log_handler(message):
+        log.debug(f'{message.type} {message.args} {message.text}')
 
     yield page
     await browser.close()

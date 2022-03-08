@@ -1,22 +1,12 @@
-import axios from 'axios';
-import OauthClient from '@girder/oauth-client';
 import * as Sentry from '@sentry/vue';
 import Vue from 'vue';
 import VueCompositionAPI from '@vue/composition-api';
 import App from './App.vue';
 import router from './router';
 import vuetify from './plugins/vuetify';
+import { axiosInstance, oauthClient } from './client';
 
 Vue.use(VueCompositionAPI);
-
-const axiosInstance = axios.create({
-  baseURL: process.env.VUE_APP_API_ROOT,
-});
-
-const oauthClient = new OauthClient(
-  process.env.VUE_APP_OAUTH_API_ROOT,
-  process.env.VUE_APP_OAUTH_CLIENT_ID,
-);
 
 Sentry.init({
   Vue,

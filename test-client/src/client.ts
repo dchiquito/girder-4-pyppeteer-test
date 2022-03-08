@@ -1,5 +1,6 @@
 import axios from 'axios';
 import OauthClient from '@girder/oauth-client';
+import { Ref, ref } from '@vue/composition-api';
 
 export const axiosInstance = axios.create({
   baseURL: process.env.VUE_APP_API_ROOT,
@@ -31,12 +32,35 @@ export interface Pagination<T> {
   results: T[],
 }
 
+// this will be initialized to a ref by maybeRestoreLogin before the app is mounted.
+// eslint-disable-next-line import/no-mutable-exports
+export let currentUser: Ref<User | null> = null as unknown as Ref<User | null>;
+
+export async function maybeRestoreLogin() {
+  await oauthClient.maybeRestoreLogin();
+  Object.assign(axiosInstance.defaults.headers.common, oauthClient.authHeaders);
+  if (currentUser === null) {
+    currentUser = ref(null);
+  }
+  await axiosInstance.get('/users/me/').then((response) => {
+    currentUser.value = response.data;
+  }, () => {
+    // The log in was not restored
+  });
+}
+
+export async function logout() {
+  await axiosInstance.post('/users/logout/');
+  await oauthClient.logout();
+  currentUser.value = null;
+}
+
 export async function getImages(): Promise<Pagination<Image>> {
   return (await axiosInstance.get('/images/')).data;
 }
 
 export async function getMyImages(): Promise<Pagination<Image>> {
-  return (await axiosInstance.get('/images/')).data;
+  return (await axiosInstance.get('/images/', { params: { owner: currentUser.value?.id } })).data;
 }
 
 export function getImageUrl(imageId: number): string {

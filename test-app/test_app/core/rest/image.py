@@ -28,7 +28,7 @@ class ImageViewSet(ReadOnlyModelViewSet):
     serializer_class = ImageSerializer
 
     filter_backends = [filters.DjangoFilterBackend]
-    filterset_fields = ['name', 'checksum']
+    filterset_fields = ['name', 'checksum', 'owner']
 
     pagination_class = PageNumberPagination
 

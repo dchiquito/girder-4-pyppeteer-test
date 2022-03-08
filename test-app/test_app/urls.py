@@ -5,7 +5,7 @@ from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions, routers
 
-from test_app.core.rest import ImageViewSet
+from test_app.core.rest import ImageViewSet, users_logout_view, users_me_view
 from test_app.core.views import GalleryView, image_summary
 
 router = routers.SimpleRouter()
@@ -24,6 +24,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/s3-upload/', include('s3_file_field.urls')),
     path('api/v1/', include(router.urls)),
+    path('api/v1/users/logout/', users_logout_view),
+    path('api/v1/users/me/', users_me_view),
     path('api/docs/redoc/', schema_view.with_ui('redoc'), name='docs-redoc'),
     path('api/docs/swagger/', schema_view.with_ui('swagger'), name='docs-swagger'),
     path('summary/', image_summary, name='image-summary'),

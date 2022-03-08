@@ -4,7 +4,7 @@ import VueCompositionAPI from '@vue/composition-api';
 import App from './App.vue';
 import router from './router';
 import vuetify from './plugins/vuetify';
-import { axiosInstance, oauthClient } from './client';
+import { axiosInstance, oauthClient, maybeRestoreLogin } from './client';
 
 Vue.use(VueCompositionAPI);
 
@@ -13,9 +13,7 @@ Sentry.init({
   dsn: process.env.VUE_APP_SENTRY_DSN,
 });
 
-oauthClient.maybeRestoreLogin().then(async () => {
-  Object.assign(axiosInstance.defaults.headers.common, oauthClient.authHeaders);
-
+maybeRestoreLogin().then(async () => {
   new Vue({
     provide: {
       axios: axiosInstance,

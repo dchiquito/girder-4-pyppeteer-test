@@ -4,11 +4,9 @@ echo "Navigating to $INPUT_WORKING_DIRECTORY"
 cd $INPUT_WORKING_DIRECTORY
 echo "Installing with $INPUT_INSTALL_COMMAND"
 $INPUT_INSTALL_COMMAND
-echo "node version:"
-node --version
-echo "npm version:"
-npm --version
-echo "yarn version:"
-yarn --version
+echo "node version: $(node --version)"
+echo "npm version: $(npm --version)"
+echo "yarn version: $(yarn --version)"
+echo "vue version: $(vue --version)"
 echo "Running tests with $INPUT_TEST_COMMAND"
 $INPUT_TEST_COMMAND

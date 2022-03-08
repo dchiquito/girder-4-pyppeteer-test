@@ -37,3 +37,17 @@ services:
       - postgres
       - rabbitmq
       - minio
+
+  yarn:
+    image: node:latest
+    command: ["yarn", "run", "serve", "--port", "8080"]
+    working_dir: /opt/client
+    environment:
+      # Fixes https://github.com/OpenImaging/miqa/issues/298
+      # nodeversion >=17 deprecated some OpenSSL algorithms which a dependency is still using
+      # https://nodejs.org/en/blog/release/v17.0.0/
+      - NODE_OPTIONS=--openssl-legacy-provider
+    volumes:
+      - ../test-client:/opt/client
+    ports:
+      - 8080:8080

@@ -47,8 +47,9 @@ def webpack_server(_pyppeteer_config, live_server):
     except ModuleNotFoundError as e:
         pytest.skip(f'{e.name} not found')
     env = {
+        'VUE_APP_OAUTH_CLIENT_ID': 'test-oauth-client-id',
         **os.environ,
-        'VUE_APP_API_URL': f'{live_server.url}/api/v1',
+        'VUE_APP_API_ROOT': f'{live_server.url}/api/v1',
         'VUE_APP_OAUTH_API_ROOT': f'{live_server.url}/oauth/',
     }
 
@@ -140,3 +141,20 @@ async def page(live_server, client, user):
 
     yield page
     await browser.close()
+
+
+@pytest.fixture
+def oauth_application(webpack_server):
+    from oauth2_provider.models import get_application_model
+    Application = get_application_model()
+    application = Application(
+        name='test-client-application',
+        client_id='test-oauth-client-id', # TODO no magic strings
+        client_secret='',
+        client_type='public',
+        redirect_uris=webpack_server,
+        authorization_grant_type='authorization-code',
+        skip_authorization=True,
+    )
+    application.save()
+    return application

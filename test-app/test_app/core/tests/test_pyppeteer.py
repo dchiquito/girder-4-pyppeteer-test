@@ -1,15 +1,40 @@
 import pytest
 
 
-@pytest.mark.pyppeteer
-async def test_login(page, webpack_server, oauth_application):
+@pytest.fixture
+async def logged_in_page(webpack_server, page, user, page_login):
+    await page_login(page, user)
     await page.goto(webpack_server)
     login_button = await page.waitForXPath('//button[contains(., "Login")]')
     await login_button.click()
-    # Wait for elements that should only be present if login succeeded
-    await page.waitForXPath('//button[contains(., "Logout")]')
-    await page.waitForXPath('//a[contains(., "My Images")]')
+    return page
+
 
 @pytest.mark.pyppeteer
-async def test_foo(page, webpack_server):
-    assert 1 == 2
+async def test_login_hack(logged_in_page):
+    # Wait for elements that should only be present if login succeeded
+    await logged_in_page.waitForXPath('//button[contains(., "Logout")]')
+    await logged_in_page.waitForXPath('//a[contains(., "My Images")]')
+
+
+@pytest.mark.pyppeteer
+async def test_image_lists(logged_in_page, image_factory, user, user_factory):
+    my_image = image_factory(owner=user)
+    other_user = user_factory()
+    other_image = image_factory(owner=other_user)
+
+    # The All Images tab should have both images
+    all_images_tab = await logged_in_page.waitForXPath('//a[contains(., "All Images")]')
+    await all_images_tab.click()
+    await logged_in_page.waitForXPath(f'//div[@class="v-card__title"][contains(., "{ my_image.name }")]')
+    await logged_in_page.waitForXPath(f'//div[@class="v-card__subtitle"][contains(., "{ user.username }")]')
+    await logged_in_page.waitForXPath(f'//div[@class="v-card__title"][contains(., "{ other_image.name }")]')
+    await logged_in_page.waitForXPath(f'//div[@class="v-card__subtitle"][contains(., "{ other_user.username }")]')
+
+    # The My Images tab should only have my image
+    my_images_tab = await logged_in_page.waitForXPath('//a[contains(., "My Images")]')
+    await my_images_tab.click()
+    await logged_in_page.waitForXPath(f'//div[@class="v-card__title"][contains(., "{ my_image.name }")]')
+    await logged_in_page.waitForXPath(f'//div[@class="v-card__subtitle"][contains(., "{ user.username }")]')
+    # The other image should be absent
+    assert (await logged_in_page.xpath(f'//div[@class="v-card__title"][contains(., "{ other_image.name }")]')) == []

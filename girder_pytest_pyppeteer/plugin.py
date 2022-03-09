@@ -98,16 +98,13 @@ def webpack_server(_pyppeteer_config, live_server):
 
 
 @pytest.fixture
-async def page(live_server, client, user):
+async def page():
     try:
-        import pyppeteer
         from pyppeteer.launcher import Launcher
         from pyppeteer.errors import BrowserError
         import pytest_asyncio
     except ModuleNotFoundError as e:
         pytest.skip(f'{e.name} not found')
-    client.force_login(user)
-    sessionid = client.cookies['sessionid'].value
     launch_kwargs = {
         'ignoreHTTPSErrors':True,
         'headless':True,
@@ -126,14 +123,6 @@ async def page(live_server, client, user):
 
         raise e
     page = await browser.newPage()
-    await page.setCookie(
-        {
-            'name': 'sessionid',
-            'value': sessionid,
-            'url': live_server.url,
-            'path': '/',
-        }
-    )
 
     @page.on('console')
     def _console_log_handler(message):
@@ -158,3 +147,19 @@ def oauth_application(webpack_server):
     )
     application.save()
     return application
+
+@pytest.fixture
+def page_login(live_server, webpack_server, oauth_application, client):
+    async def _page_login(page, user):
+        client.force_login(user)
+        sessionid = client.cookies['sessionid'].value
+        await page.setCookie(
+            {
+                'name': 'sessionid',
+                'value': sessionid,
+                'url': live_server.url,
+                'path': '/',
+            }
+        )
+        await page.waitFor(2_000) # TODO more reliable wait
+    return _page_login

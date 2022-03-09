@@ -1,6 +1,11 @@
 # girder-pytest-pyppeteer
 A collection of tools for using [pyppeteer](https://github.com/pyppeteer/pyppeteer) to implement browser testing for [Girder 4 applications](https://github.com/girder/cookiecutter-girder-4).
 
+Specifically, **girder-pytest-pyppeteer** is
+- A pytest plugin
+- A [GitHub Action](https://github.com/dchiquito/girder-pytest-pyppeteer/pkgs/container/pytest-pyppeteer)
+- Instructions and examples for installation
+
 ## The problem
 Generally, writing useful browser tests is difficult for a number of reasons.
 
@@ -13,8 +18,8 @@ Luckily, Girder 4 applications have a bit of homogeneity, at least enough to bui
 
 - **Tests are written with [pytest](https://docs.pytest.org/), [pyppeteer](https://github.com/pyppeteer/pyppeteer), and [pytest-django](https://pytest-django.readthedocs.io/en/latest/index.html).** This means you can write and store your browser tests right next to your Django unit tests, and run them with [tox](https://tox.wiki/). Various pyppeteer fixtures are provided, so you don't need to worry about invoking pyppeteer yourself.
 - **Django and node servers are managed by fixtures.** [pytest-django](https://pytest-django.readthedocs.io/en/latest/index.html) provides a handy fixture `live_server`, which runs a real web server backed by the test database. This makes it trivial to create models for testing; simply save a model in the test method, and it will be available immediately to the web frontend. The node server is provided by the `webpack_server` fixture, and is automatically plugged in to the Django `live_server`. Other service dependencies (Minio, RabbitMQ, etc.) are expected to be provided through docker containers, just like in normal Django unit tests.
-- **Pyppeteer is easy to run locally.** The `pyppeteer` package automatically bundles the required Chromium version, so you don't need to worry about browser installation or versioning. 
-- **A GitHub action is provided for running in CI.** Installing and invoking Chromium in a docker container is difficult, so the hard work is already done. All you need to do is add a new step to your existing CI that invokes the action.
+- **Pyppeteer is easy to run locally.** If you already have Chrome installed, installing `pyppeteer` package will handle the rest. It automatically bundles the required Chromium version, so you don't need to worry about browser installation or versioning.
+- **A GitHub Action is provided for running in CI.** The action has everything installed and wired up. All you need to do is add a new step to your existing CI that invokes the action.
 
 ## Is girder-pytest-pyppeteer right for me?
 This project provides solutions by making assumptions. If those assumptions are violated, this toolkit might not be the best fit, although individual parts can always be used in isolation.

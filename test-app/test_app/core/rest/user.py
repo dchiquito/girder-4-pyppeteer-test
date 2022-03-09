@@ -1,7 +1,7 @@
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from django.http.response import HttpResponseBase
-from drf_yasg.utils import swagger_auto_schema, no_body
+from drf_yasg.utils import no_body, swagger_auto_schema
 from rest_framework import serializers
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -37,6 +37,6 @@ def users_me_view(request: Request) -> HttpResponseBase:
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def users_logout_view(request: Request) -> HttpResponseBase:
-    """Logs the user out."""
+    """Log the user out."""
     logout(request)
     return Response(status=204)

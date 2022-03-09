@@ -26,15 +26,31 @@ async def test_image_lists(logged_in_page, image_factory, user, user_factory):
     # The All Images tab should have both images
     all_images_tab = await logged_in_page.waitForXPath('//a[contains(., "All Images")]')
     await all_images_tab.click()
-    await logged_in_page.waitForXPath(f'//div[@class="v-card__title"][contains(., "{ my_image.name }")]')
-    await logged_in_page.waitForXPath(f'//div[@class="v-card__subtitle"][contains(., "{ user.username }")]')
-    await logged_in_page.waitForXPath(f'//div[@class="v-card__title"][contains(., "{ other_image.name }")]')
-    await logged_in_page.waitForXPath(f'//div[@class="v-card__subtitle"][contains(., "{ other_user.username }")]')
+    await logged_in_page.waitForXPath(
+        f'//div[@class="v-card__title"][contains(., "{ my_image.name }")]'
+    )
+    await logged_in_page.waitForXPath(
+        f'//div[@class="v-card__subtitle"][contains(., "{ user.username }")]'
+    )
+    await logged_in_page.waitForXPath(
+        f'//div[@class="v-card__title"][contains(., "{ other_image.name }")]'
+    )
+    await logged_in_page.waitForXPath(
+        f'//div[@class="v-card__subtitle"][contains(., "{ other_user.username }")]'
+    )
 
     # The My Images tab should only have my image
     my_images_tab = await logged_in_page.waitForXPath('//a[contains(., "My Images")]')
     await my_images_tab.click()
-    await logged_in_page.waitForXPath(f'//div[@class="v-card__title"][contains(., "{ my_image.name }")]')
-    await logged_in_page.waitForXPath(f'//div[@class="v-card__subtitle"][contains(., "{ user.username }")]')
+    await logged_in_page.waitForXPath(
+        f'//div[@class="v-card__title"][contains(., "{ my_image.name }")]'
+    )
+    await logged_in_page.waitForXPath(
+        f'//div[@class="v-card__subtitle"][contains(., "{ user.username }")]'
+    )
     # The other image should be absent
-    assert (await logged_in_page.xpath(f'//div[@class="v-card__title"][contains(., "{ other_image.name }")]')) == []
+    assert (
+        await logged_in_page.xpath(
+            f'//div[@class="v-card__title"][contains(., "{ other_image.name }")]'
+        )
+    ) == []

@@ -21,7 +21,7 @@ This project provides solutions by making assumptions. If those assumptions are 
 
 This is the toolkit for you if:
 - **You want to write browser tests.** Pyppeteer is useful for lots of things, not just tests. 
-- **Your project was ejected from [the Girder 4 cookiecutter](https://github.com/girder/cookiecutter-girder-4).**. If you're using a similar stack you should still be able to adopt this project, but it will be a little bumpier.
+- **Your project was ejected from [the Girder 4 cookiecutter](https://github.com/girder/cookiecutter-girder-4).** If you're using a similar stack you should still be able to adopt this project, but it will be a little bumpier.
 - **You have an SPA.** The web server needs to launchable with a single command like `npm run serve` or `yarn run serve`.
 - **You are using GitHub Actions.** A custom GitHub action is provided, which obviously only works in GitHub actions.
 - **You have your backend and frontend in the same repository.** It's possible to pull from a different repository in a GitHub workflow, but managing versions and releases is much harder.

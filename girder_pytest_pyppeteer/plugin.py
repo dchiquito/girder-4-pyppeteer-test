@@ -90,13 +90,6 @@ def webpack_server(_pyppeteer_config, live_server):
             pass
 
 
-# @pytest.fixture
-# def npm_serve(webpack_server, admin_user):
-#     makeclient.callback(username=admin_user.username, uri=webpack_server + '/')
-#     return webpack_server
-
-
-
 @pytest.fixture
 async def page():
     try:

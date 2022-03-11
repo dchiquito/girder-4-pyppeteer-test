@@ -1,5 +1,5 @@
 # girder-pytest-pyppeteer
-A collection of tools for using [pyppeteer](https://github.com/pyppeteer/pyppeteer) to implement browser testing for [Girder 4 applications](https://github.com/girder/cookiecutter-girder-4).
+A collection of tools for using [pyppeteer](https://github.com/pyppeteer/pyppeteer) to implement browser-based end-to-end testing for [Girder 4 applications](https://github.com/girder/cookiecutter-girder-4). This toolkit will enable you to easily write tests for your entire application stack that behave like real users interacting with a real web browser.
 
 Specifically, **girder-pytest-pyppeteer** is
 - A pytest plugin
@@ -7,7 +7,7 @@ Specifically, **girder-pytest-pyppeteer** is
 - Instructions and examples for installation
 
 ## The problem
-Generally, writing useful browser tests is difficult for a number of reasons.
+Generally, writing useful browser-based end-to-end tests is difficult for a number of reasons.
 
 - **Writing them is hard.** To write a browser test, you need to use a browser interface tool like [Selenium](https://www.selenium.dev/) or [Puppeteer](https://developers.google.com/web/tools/puppeteer/), and then integrate it into your testing framework and pipeline. This specialized tooling requires specialized knowledge.
 - **Orchestrating them is hard.** Unlike a unit test, a browser test requires the entire application with all its sub-services to be running before the browser can even open the page. Managing all those moving parts while creating and destroying test data is an often overlooked cost to writing a useful browser test.
@@ -25,7 +25,7 @@ Luckily, Girder 4 applications have a bit of homogeneity, at least enough to bui
 This project provides solutions by making assumptions. If those assumptions are violated, this toolkit might not be the best fit, although individual parts can always be used in isolation.
 
 This is the toolkit for you if:
-- **You want to write browser tests.** Pyppeteer is useful for lots of things, not just tests. 
+- **You want to write browser tests for your entire application.** If you only want to test your frontend in isolation, you probably want to look into [component testing](https://v2.vuejs.org/v2/cookbook/unit-testing-vue-components.html?redirect=true) with [Jest](https://jestjs.io/).
 - **Your project was ejected from [the Girder 4 cookiecutter](https://github.com/girder/cookiecutter-girder-4).** If you're using a similar stack you should still be able to adopt this project, but it will be a little bumpier.
 - **You have an SPA.** The web server needs to launchable with a single command like `npm run serve` or `yarn run serve`.
 - **You are using GitHub Actions.** A custom GitHub action is provided, which obviously only works in GitHub actions.

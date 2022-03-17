@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
-        uses: docker://ghcr.io/dchiquito/pytest-pyppeteer:latest
+        uses: docker://ghcr.io/girder/pytest-pyppeteer:latest
         with:
           install_directory: test-client
           install_command: yarn install

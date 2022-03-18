@@ -22,7 +22,7 @@ Pyppeteer requires an async runner, so we also install `pytest-asyncio` to allow
 ##### Add the `test-pyppeteer` tox environment
 To run the pyppeteer tests, you will need a new tox environment that looks something like this:
 
-```
+```toml
 [testenv:test-pyppeteer]
 setenv =
     # See https://docs.djangoproject.com/en/4.0/topics/async/#envvar-DJANGO_ALLOW_ASYNC_UNSAFE

@@ -1,0 +1,2 @@
+# GitHub Action
+The GitHub Action is provided as a [GitHub package](https://github.com/girder/girder-pytest-pyppeteer/pkgs/container/pytest-pyppeteer) that can be embedded into your GitHub Actions workflow right next to the rest of your CI.

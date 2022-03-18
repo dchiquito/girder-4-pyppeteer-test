@@ -1,1 +1,10 @@
 site_name: girder-pytest-pyppeteer
+
+plugins:
+  - mkdocstrings
+
+nav:
+  - Home: 'index.md'
+  - Components:
+    - 'pytest_plugin.md'
+  - 'setup.md'

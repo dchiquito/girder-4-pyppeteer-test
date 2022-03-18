@@ -1,17 +1,13 @@
-# Welcome to MkDocs
+# girder-pytest-pyppeteer
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+[girder-pytest-pyppeteer](https://github.com/girder/girder-pytest-pyppeteer) is a toolkit that makes it easy to use [pyppeteer](https://github.com/pyppeteer/pyppeteer) to implement browser-based end-to-end testing for [Girder 4 applications](https://github.com/girder/cookiecutter-girder-4).
 
-## Commands
+## Components
+Girder 4 applications all share a common stack, but implementation and deployment details tend to differ between applications. Since end-to-end testing necessarily involves deploying the whole application into a test environment, there is no one size fits all plugin that can be used for end-to-end testing.
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+Instead, girder-pytest-pyppeteer offers you a number of tools for setting up your end-to-end tests:
 
-## Project layout
-
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+* A pytest plugin - Defines helpful fixtures that set up and manipulate the browser context.
+* A GitHub Action - Easily run your tests in CI
+* Installation instructions - Get started ASAP
+* **Coming Soon** Vuetify locators - Identify Vuetify page elements without sweating about locators

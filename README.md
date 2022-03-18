@@ -3,7 +3,7 @@ A collection of tools for using [pyppeteer](https://github.com/pyppeteer/pyppete
 
 Specifically, **girder-pytest-pyppeteer** is
 - A pytest plugin
-- A [GitHub Action](https://github.com/dchiquito/girder-pytest-pyppeteer/pkgs/container/pytest-pyppeteer)
+- A [GitHub Action](https://github.com/girder/girder-pytest-pyppeteer/pkgs/container/pytest-pyppeteer)
 - Instructions and examples for installation
 
 ## The problem

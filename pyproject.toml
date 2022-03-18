@@ -7,7 +7,7 @@ license = "Apache License 2.0"
 classifiers = ["Framework :: Pytest"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.7"
 pytest = "^7.0.1"
 # dependencies to run pyppeteer tests
 pyppeteer = {version = "^1.0.2", optional = true}

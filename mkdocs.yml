@@ -7,4 +7,5 @@ nav:
   - Home: 'index.md'
   - Components:
     - 'pytest_plugin.md'
+    - 'github_action.md'
   - 'setup.md'

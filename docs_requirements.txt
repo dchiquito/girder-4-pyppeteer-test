@@ -2,3 +2,4 @@ mkdocs-autorefs==0.4.1
 mkdocs==1.2.3
 mkdocstrings-python-legacy==0.2.2
 mkdocstrings==0.18.1
+.

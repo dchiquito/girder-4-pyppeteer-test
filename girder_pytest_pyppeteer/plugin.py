@@ -72,9 +72,10 @@ def webpack_server(_pyppeteer_config, live_server):
             try:
                 _out, err = process.communicate(timeout=retry_interval)
             except TimeoutExpired as e:
-                if match := re.search(
+                match = re.search(
                     b'App running at:\n  - Local:   (http[s]?://[a-z]+:[0-9]+/?) \n', e.stdout
-                ):
+                )
+                if match:
                     url = match.group(1).decode('utf-8')
                     break
         else:

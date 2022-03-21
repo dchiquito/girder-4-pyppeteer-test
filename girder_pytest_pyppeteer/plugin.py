@@ -28,24 +28,34 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "pyppeteer: This is a pyppeteer test.")
 
 
-@pytest.fixture(scope='session')
-def _pyppeteer_config(request):
-    config = {
-        'PYPPETEER_TEST_CLIENT_COMMAND': request.config.getoption('PYPPETEER_TEST_CLIENT_COMMAND'),
-        'PYPPETEER_TEST_CLIENT_DIR': request.config.getoption('PYPPETEER_TEST_CLIENT_DIR'),
-    }
-    for key, value in config.items():
-        if value is None:
-            pytest.fail(f'{key} not defined')
-    return config
+def is_pyppeteer_enabled(request):
+    """Determine if the pyppeteer mark was specified when invoking pytest."""
+    return 'pyppeteer' in request.config.getoption('markexpr')
+
+
+def skip_if_pyppeteer_disabled(request):
+    """Skip the test if the pyppeteer mark was not specified when invoking pytest"""
+    if not is_pyppeteer_enabled(request):
+        pytest.skip('pyppeteer mark not specified')
 
 @pytest.fixture(scope='session')
-def webpack_server(_pyppeteer_config, live_server):
-    try:
-        import pyppeteer
-        import pytest_asyncio
-    except ModuleNotFoundError as e:
-        pytest.skip(f'{e.name} not found')
+def _pyppeteer_config(request):
+    # We cannot use skip_if_pyppeteer_disabled here because this fixture is session scoped.
+    # Instead, just don't return anything. Nothing will be using this fixture anyway.
+    if is_pyppeteer_enabled(request):
+        config = {
+            'PYPPETEER_TEST_CLIENT_COMMAND': request.config.getoption('PYPPETEER_TEST_CLIENT_COMMAND'),
+            'PYPPETEER_TEST_CLIENT_DIR': request.config.getoption('PYPPETEER_TEST_CLIENT_DIR'),
+        }
+        for key, value in config.items():
+            if value is None:
+                pytest.fail(f'{key} not defined')
+        return config
+
+@pytest.fixture(scope='session')
+def webpack_server(request, _pyppeteer_config, live_server):
+    """Webpack server"""
+    skip_if_pyppeteer_disabled(request)
     env = {
         'VUE_APP_OAUTH_CLIENT_ID': 'test-oauth-client-id',
         **os.environ,
@@ -92,13 +102,11 @@ def webpack_server(_pyppeteer_config, live_server):
 
 
 @pytest.fixture
-async def page():
-    try:
-        from pyppeteer.launcher import Launcher
-        from pyppeteer.errors import BrowserError
-        import pytest_asyncio
-    except ModuleNotFoundError as e:
-        pytest.skip(f'{e.name} not found')
+async def page(request):
+    skip_if_pyppeteer_disabled(request)
+    from pyppeteer.launcher import Launcher
+    from pyppeteer.errors import BrowserError
+    import pytest_asyncio
     launch_kwargs = {
         'ignoreHTTPSErrors':True,
         'headless':True,

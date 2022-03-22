@@ -135,7 +135,7 @@ async def page(request):
 
 
 @pytest.fixture
-def oauth_application(webpack_server):
+def oauth_application(webpack_server: str):
     from oauth2_provider.models import get_application_model
     Application = get_application_model()
     application = Application(
@@ -143,7 +143,7 @@ def oauth_application(webpack_server):
         client_id='test-oauth-client-id', # TODO no magic strings
         client_secret='',
         client_type='public',
-        redirect_uris=webpack_server,
+        redirect_uris=webpack_server if webpack_server.endswith('/') else f'{webpack_server}/',
         authorization_grant_type='authorization-code',
         skip_authorization=True,
     )

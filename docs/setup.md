@@ -33,7 +33,7 @@ setenv =
     PYPPETEER_TEST_CLIENT_DIR=client
     # nodeversion >=17 deprecated some OpenSSL algorithms which a dependency is still using
     # https://nodejs.org/en/blog/release/v17.0.0/
-    NODE_OPTIONS=--openssl-legacy-provider
+    PYPPETEER_NODE_OPTIONS=--openssl-legacy-provider
     # I had to set this to get the browser window to show up in Ubuntu 20.04
     DISPLAY=:1
 passenv =
@@ -43,6 +43,7 @@ passenv =
     DJANGO_MINIO_STORAGE_ENDPOINT
     DJANGO_MINIO_STORAGE_SECRET_KEY
     DJANGO_STORAGE_BUCKET_NAME
+    PYPPETEER_BROWSER_HEADLESS
 deps =
     factory-boy
     girder-pytest-pyppeteer[pyppeteer]
@@ -61,8 +62,9 @@ This should be pretty close to your existing `[testenv:test]`, but with some add
 * `PYPETEER_TEST_CLIENT_COMMAND` - The command used to launch the frontend server. This should generally be one of `npm run serve` or `yarn run serve`, depending on which you are using in the frontend.
 * `PYPPETEER_TEST_CLIENT_DIR` - The path to the directory containing the frontend project, relative to the root of the Django project. For example, if you had two folders `my_django_app` and `my_vue_app` that contained the Django project and Vue projects respectively, this would be set to `../my_vue_app`. If instead your Vue project is contained within your Django project, like `my_django_app/my_vue_app`, this would be set to `my_vue_app`.
     * If your project is not a monorepo, you will need to make some policy decisions about where developers and the CI environment keep their Vue repository. You could require developers to clone or symlink the Vue repository to the same location (`/my_vue_app`), or perhaps document how to configure a custom tox environment that allows them to customize the location of the Vue repository. In CI, you can explicitly check out a specific tag in the Vue repository at a specific location that matches this configuration setting.
-* `NODE_OPTIONS=--openssl-legacy-provider` - Required when using certain older libraries with node >= 17. The CI image uses Node version 17, so you should ensure your local development node version is similarly up to date. Hopefully at some point the legacy dependencies that are necessitating this setting will be updated and this requirement can be removed.
+* `PYPPETEER_NODE_OPTIONS=--openssl-legacy-provider` - Required when using certain older libraries with node >= 17. The CI image uses Node version 17, so you should ensure your local development node version is similarly up to date. Hopefully at some point the legacy dependencies that are necessitating this setting will be updated and this requirement can be removed.
 * `DISPLAY=:1` - This was required in my environment (Ubuntu 20.04) for the browser window to render when running locally in non-headless mode. Your mileage may vary.
 * `passenv DJANGO_STORAGE_BUCKET_NAME` - This is the only setting required by the `DevelopmentConfiguration` that isn't included in the normal test configuration. You may need to include more settings here depending on your configuration.
+* `passenv PYPPETEER_BROWSER_HEADLESS` - This is a debugging feature to make it easier to open the Chromium browser in non-headless mode for debugging purposes. The intended usage is to invoke tox with `PYPPETEER_BROWSER_HEADLESS=0 tox -e test-pyppeteer`.
 * `deps = girder-pytest-pyppeteer[pyppeteer]` - This ensures `pyppeteer` is installed, in addition to the pytest plugin.
 * `pytest -m pyppeteer {posargs}` - This invokes only the tests tagged with `@pytest.mark.pyppeteer`. 

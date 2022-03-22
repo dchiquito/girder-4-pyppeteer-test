@@ -9,23 +9,9 @@ from subprocess import PIPE, Popen, TimeoutExpired
 
 log = logging.getLogger('pytest-pyppeteer')
 
-def pytest_addoption(parser, pluginmanager):
-    parser.addoption(
-        "--client-command",
-        dest='PYPPETEER_TEST_CLIENT_COMMAND',
-        help="The command to start the test client",
-        default=os.getenv('PYPPETEER_TEST_CLIENT_COMMAND'),
-    )
-    parser.addoption(
-        "--client-dir",
-        dest='PYPPETEER_TEST_CLIENT_DIR',
-        help="The directory to start the test client in",
-        default=os.getenv('PYPPETEER_TEST_CLIENT_DIR'),
-    )
-
 
 def pytest_configure(config):
-    config.addinivalue_line("markers", "pyppeteer: This is a pyppeteer test.")
+    config.addinivalue_line('markers', 'pyppeteer: This is a pyppeteer test.')
 
 
 def is_pyppeteer_enabled(request):
@@ -41,15 +27,24 @@ def skip_if_pyppeteer_disabled(request):
 @pytest.fixture(scope='session')
 def _pyppeteer_config(request):
     # We cannot use skip_if_pyppeteer_disabled here because this fixture is session scoped.
-    # Instead, just don't return anything. Nothing will be using this fixture anyway.
+    # Instead, just don't return anything. Anything that would use this fixture would skip anyway.
     if is_pyppeteer_enabled(request):
         config = {
-            'PYPPETEER_TEST_CLIENT_COMMAND': request.config.getoption('PYPPETEER_TEST_CLIENT_COMMAND'),
-            'PYPPETEER_TEST_CLIENT_DIR': request.config.getoption('PYPPETEER_TEST_CLIENT_DIR'),
+            # The default configuration
+            'VUE_APP_API_ROOT': '{live_server}/api/v1',
+            'VUE_APP_OAUTH_API_ROOT': '{live_server}/oauth/',
+            'VUE_APP_OAUTH_CLIENT_ID': 'test-oauth-client-id',
+            # Any env vars that start with "PYPPETEER_" with the prefix trimmed
+            **{
+                key[10:]:value
+                for (key,value) in os.environ.items()
+                if key.startswith('PYPPETEER_')
+            },
         }
-        for key, value in config.items():
-            if value is None:
-                pytest.fail(f'{key} not defined')
+        required_settings = ['TEST_CLIENT_COMMAND', 'TEST_CLIENT_DIR']
+        for required_setting in required_settings:
+            if required_setting not in config:
+                pytest.fail(f'Required environment variable PYPPETEER_{required_setting} not defined')
         return config
 
 @pytest.fixture(scope='session')
@@ -57,17 +52,18 @@ def webpack_server(request, _pyppeteer_config, live_server):
     """Webpack server"""
     skip_if_pyppeteer_disabled(request)
     env = {
-        'VUE_APP_OAUTH_CLIENT_ID': 'test-oauth-client-id',
-        **os.environ,
-        'VUE_APP_API_ROOT': f'{live_server.url}/api/v1',
-        'VUE_APP_OAUTH_API_ROOT': f'{live_server.url}/oauth/',
+        # The path must be passed so that npm/yarn can be found
+        **{'PATH': os.getenv('PATH')},
+        # Pass everything from the pyppeteer config, formatted for the current environment
+        **{
+            key:value.format(live_server=live_server.url) for (key, value) in _pyppeteer_config.items()
+        },
     }
-
-    command = ['/usr/bin/env'] + shlex.split(_pyppeteer_config['PYPPETEER_TEST_CLIENT_COMMAND'])
+    command = ['/usr/bin/env'] + shlex.split(_pyppeteer_config['TEST_CLIENT_COMMAND'])
     log.debug(f'Launching node server with {command}')
     process = Popen(
         command,
-        cwd=_pyppeteer_config['PYPPETEER_TEST_CLIENT_DIR'],
+        cwd=_pyppeteer_config['TEST_CLIENT_DIR'],
         env=env,
         stdout=PIPE,
         stderr=PIPE,
@@ -102,18 +98,53 @@ def webpack_server(request, _pyppeteer_config, live_server):
 
 
 @pytest.fixture
-async def page(request):
+async def page(request, _pyppeteer_config):
+    """
+    A pyppeteer page in a fresh browser environment with some sane defaults set.
+
+    Pyppeteer offers a number of arguments to configure the browser during initialization.
+    Currently, a subset of these arguments are configurable using environment variables:
+    
+    Environment Variable|Pyppeteer Equivalent|Values|Default
+    ---|---|---|---
+    PYPPETEER_BROWSER_IGNORE_HTTPS_ERRORS|ignoreHTTPSErrors|"True"/"1" or "False"/"0"|"True"
+    PYPPETEER_BROWSER_HEADLESS|headless|"True"/"1" or "False"/"0"|"True"
+    PYPPETEER_BROWSER_WIDTH|defaultViewport.width|int|1024
+    PYPPETEER_BROWSER_HEIGHT|defaultViewport.height|int|800
+    PYPPETEER_BROWSER_DUMPIO|dumpio|"True"/"1" or "False"/"0"|"True"
+
+    You can set these in your `tox.ini` `setenv` block, or name them in the `passenv` section and set them manually in the shell prior to running tox.
+    """
     skip_if_pyppeteer_disabled(request)
     from pyppeteer.launcher import Launcher
     from pyppeteer.errors import BrowserError
     import pytest_asyncio
+
     launch_kwargs = {
-        'ignoreHTTPSErrors':True,
-        'headless':True,
-        'defaultViewport':{'width': 1024, 'height': 800},
+        'ignoreHTTPSErrors': True,
+        'headless': True,
+        'defaultViewport': {'width': 1024, 'height': 800},
         'args': ['--no-sandbox'],
         'dumpio': True,
     }
+    def parse_bool(value):
+        if value in ('True', '1'):
+            return True
+        elif value in ('False', '0'):
+            return False
+        raise ValueError(f'invalid boolean: \'{value}\'')
+    for key, value in _pyppeteer_config.items():
+        if key == 'BROWSER_IGNORE_HTTPS_ERRORS':
+            launch_kwargs['ignoreHTTPSErrors'] = parse_bool(value)
+        if key == 'BROWSER_HEADLESS':
+            launch_kwargs['headless'] = parse_bool(value)
+        if key == 'BROWSER_WIDTH':
+            launch_kwargs['defaultViewport']['width'] = int(value)
+        if key == 'BROWSER_HEIGHT':
+            launch_kwargs['defaultViewport']['height'] = int(value)
+        if key == 'BROWSER_DUMPIO':
+            launch_kwargs['dumpio'] = parse_bool(value)
+
     launcher = Launcher(**launch_kwargs)
     try:
         browser = await launcher.launch()
@@ -135,12 +166,12 @@ async def page(request):
 
 
 @pytest.fixture
-def oauth_application(webpack_server: str):
+def oauth_application(_pyppeteer_config, webpack_server: str):
     from oauth2_provider.models import get_application_model
     Application = get_application_model()
     application = Application(
         name='test-client-application',
-        client_id='test-oauth-client-id', # TODO no magic strings
+        client_id=_pyppeteer_config['VUE_APP_OAUTH_CLIENT_ID'],
         client_secret='',
         client_type='public',
         redirect_uris=webpack_server if webpack_server.endswith('/') else f'{webpack_server}/',

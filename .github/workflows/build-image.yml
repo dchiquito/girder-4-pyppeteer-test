@@ -19,4 +19,6 @@ jobs:
       - name: Upload the docker image to GitHub Container Registry
         run: |
           docker push ghcr.io/girder/$IMAGE_NAME:latest
-          docker push ghcr.io/girder/$IMAGE_NAME:$GITHUB_REF
+          echo $GITHUB_REF
+          echo $GITHUB_REF_NAME
+          docker push ghcr.io/girder/$IMAGE_NAME:$GITHUB_REF_NAME

@@ -9,4 +9,4 @@ nav:
     - 'pytest_plugin.md'
     - 'github_action.md'
   - 'setup.md'
-  - 'debugging.md'
+  - Debugging: 'debugging.md'

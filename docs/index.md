@@ -7,7 +7,7 @@ Girder 4 applications all share a common stack, but implementation and deploymen
 
 Instead, girder-pytest-pyppeteer offers you a number of tools for setting up your end-to-end tests:
 
-* A pytest plugin - Defines helpful fixtures that set up and manipulate the browser context.
-* A GitHub Action - Easily run your tests in CI
-* Installation instructions - Get started ASAP
-* **Coming Soon** Vuetify locators - Identify Vuetify page elements without sweating about locators
+* [**A pytest plugin**](pytest_plugin.md) - Defines helpful fixtures that set up and manipulate the browser context.
+* [**A GitHub Action**](github_action.md) - Easily run your tests in CI
+* [**Installation instructions**](setup.md) - Get started ASAP
+* ** *Coming Soon!* Vuetify locators** - Identify Vuetify page elements without sweating about locators

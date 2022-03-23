@@ -10,14 +10,14 @@ These instructions assume:
 
 If your project does not match these assumptions, keep in mind that the instructions are not tailored for your use case and will likely require some adjustments.
 
-## Instructions
+## Installation
 
-##### Add `girder-pytest-pyppeteer` and `pytest-asyncio` to your project's test dependencies
+##### Add [`girder-pytest-pyppeteer`](https://pypi.org/project/girder-pytest-pyppeteer/) and [`pytest-asyncio`](https://pypi.org/project/pytest-asyncio/) to your project's test dependencies
 The tests you will be writing will live next to the rest of your tests, so Pytest needs to have all the fixtures and plugins available when it runs your normal suite of tests.
 
-Installing `girder-pytest-pyppeteer` makes the plugin and fixtures available, but does not actually install [`pyppeteer`](https://github.com/pyppeteer/pyppeteer). To do that, you need to install the extra `girder-pytest-pyppeteer[pyppeteer]`.
+Installing [`girder-pytest-pyppeteer`](https://pypi.org/project/girder-pytest-pyppeteer/) makes the plugin and fixtures available, but does not actually install [`pyppeteer`](https://github.com/pyppeteer/pyppeteer). To do that, you need to install the extra `girder-pytest-pyppeteer[pyppeteer]`.
 
-Pyppeteer requires an async runner, so we also install `pytest-asyncio` to allow Pytest to deal with `async` test functions. You are free to use whatever async runner is convenient, but these instructions will assume `pytest-asyncio`.
+Pyppeteer requires an async runner, so we also install [`pytest-asyncio`](https://pypi.org/project/pytest-asyncio/) to allow Pytest to deal with `async` test functions. You are free to use whatever async runner is convenient, but these instructions will assume `pytest-asyncio`.
 
 ##### Add the `test-pyppeteer` tox environment
 To run the pyppeteer tests, you will need a new tox environment that looks something like this:
@@ -67,4 +67,112 @@ This should be pretty close to your existing `[testenv:test]`, but with some add
 * `passenv DJANGO_STORAGE_BUCKET_NAME` - This is the only setting required by the `DevelopmentConfiguration` that isn't included in the normal test configuration. You may need to include more settings here depending on your configuration.
 * `passenv PYPPETEER_BROWSER_HEADLESS` - This is a debugging feature to make it easier to open the Chromium browser in non-headless mode for debugging purposes. The intended usage is to invoke tox with `PYPPETEER_BROWSER_HEADLESS=0 tox -e test-pyppeteer`.
 * `deps = girder-pytest-pyppeteer[pyppeteer]` - This ensures `pyppeteer` is installed, in addition to the pytest plugin.
-* `pytest -m pyppeteer {posargs}` - This invokes only the tests tagged with `@pytest.mark.pyppeteer`. 
+* `pytest -m pyppeteer {posargs}` - This invokes only the tests tagged with `@pytest.mark.pyppeteer`.
+
+This list should be treated as a guide, not a cookiecutter. You will likely need to make some additions, omissions, and modifications to tune your project correctly. If you have any ideas that might apply more generally, issues and PRs are welcome.
+
+## Writing your first test
+Pyppeteer tests are exactly the same as normal pytest tests, just with some extra bells and whistles.
+
+Here's a simple example of a test for the Kitware homepage:
+
+```python
+import pytest
+
+@pytest.mark.pyppeteer
+async def test_kitware_homepage(page):
+    # Go to the kitware home page
+    await page.goto('https://www.kitware.com/')
+    # Click the "About" link
+    about_link = await page.waitForXPath('//a[.="About"]')
+    await about_link.click()
+    # Wait one second for the page to finish loading
+    await page.waitFor(1_000)
+    # Implicitly assert that the page contains the text "Open Source" somewhere
+    assert await page.waitForXPath('//div[contains(.,"Open Source")]') 
+```
+
+* The `@pytest.mark.pyppeteer` is required to distinguish your pyppeteer tests from your other unit/integration tests. 
+* The `async` in the function definition is required because pyppeteer uses `async`/`await` to drive page actions.
+* The [`page`](pytest_plugin.md#page) fixture is a [Pyppeteer Page](https://miyakogi.github.io/pyppeteer/reference.html#page-class) instance. This is what you will use to interact with the browser.
+
+Because of its special environmental requirements, by default pyppeteer tests will not run when simply invoking `tox`. To run this test, you will need to call out pyppeteer explicitly:
+
+```bash
+tox -e test-pyppeteer
+```
+
+If you want to see the browser to confirm that it's doing what it says it's doing, run with the `PYPPETEER_BROWSER_HEADLESS` environment variable set to `False`:
+
+```bash
+PYPPETEER_BROWSER_HEADLESS=0 tox -e test-pyppeteer
+```
+
+## The [webpack_server](pytest_plugin.md#webpack_server) fixture
+Now that we have confirmed pyppeteer is working, lets get the frontend plugged in. It should be as simple as:
+
+```python
+import pytest
+
+@pytest.mark.pyppeteer
+async def test_homepage(page, webpack_server):
+    # Navigate to the webpack server
+    await page.goto(webpack_server)
+    # Wait for any JS to run
+    await page.waitFor(5_000)
+    # Take a screenshot
+    await page.screenshot({'path': 'test_screenshot.png'})
+```
+
+Behind the scenes, the [`webpack_server`](pytest_plugin.md#webpack_server) fixture invokes the `PYPPETEER_TEST_CLIENT_COMMAND` you specified in your `tox.ini` in a background process to serve your web app. You may notice that pyppeteer tests hang for a few seconds before tests begin to execute. This is because the dev server takes a few moments to spin up.
+
+To your test method, `webpack_server` is simply a string URL pointing to the dev server. To use it, simply navigate your `page` there.
+
+When you run this test, you should see a `test_screenshot.png` appear in your project root. (Note that running with `PYPPETEER_BROWSER_HEADLESS=0` is generally a much better debugging tool, though.)
+
+## Handling log ins
+We now have a web site to test and a browser to test it with, but there is one more snag you will probably encounter: log ins. Girder 4 apps generally use `oauth2_provider` to handle logins, where the web server delegates to the API server to arbitrate the login process. For `oauth2_provider`, this means you need an OAuth Application model saved in the database which is configured for your specific frontend. Also, different applications have different login UX: OAuth2 providers are different, buttons are different, and signup policies are different. Furthermore, you may want to test different users being logged in to different browsers at different times and in different ways.
+
+There is no general solution to this problem, but girder-pytest-pyppeteer does provide some tools to help you solve it yourself.
+
+* [**The `oauth_application` fixture**](pytest_plugin.md#oauth_application) - Saves an OAuth2 Application into the DB that is configured to work with the `webpack_server`. 
+* [**The `page_login` fixture**](pytest_plugin.md#page_login) - A function which saves a cookie into the `page` fixture that tricks the test API server (a fixture called [`live_server`](https://pytest-django.readthedocs.io/en/latest/helpers.html#live-server)) into thinking the given user is already logged in via the `oauth_application` fixture. 
+
+With `page_login`, you can easily skip the API half of the OAuth2 workflow. Without it, you would need to set up users with passwords, and then write some pyppeteer code that manually types the user's login information into the browser. However, note that the frontend still doesn't know that the user has already authenticated with the API server. This sample code illustrates one way around the problem:
+
+```python
+import pytest
+
+@pytest.fixture
+def log_in(webpack_server, page, page_login):
+    """Log the given user into the page."""
+    # Return a helper that can be used to log in any given User
+    async def _log_in(user):
+        # Invoke the page_login fixture
+        await page_login(page, user)
+        # The API server now thinks that the user has already logged in using the browser.
+        # Navigate to the dev server
+        await page.goto(webpack_server)
+        # Find the login button
+        login_button = await page.waitForXPath('//button[contains(., "Login")]')
+        # Click it
+        await login_button.click()
+        # Clicking login should redirect the browser to the API server,
+        # which sees the cookie set by `page_login` and redirects the browser back to the dev server,
+        # with some URL parameters containing the OAuth2 session token.
+        # After all this navigation resolves (asynchronously), the browser should be logged in.
+        return page
+
+    return _log_in
+
+
+@pytest.mark.pyppeteer
+async def test_pyppeteer(page, log_in, user, webpack_server):
+    await log_in(user)
+    # Assert that the page contains the welcome message for logged in users
+    # This has the side effect of waiting for the redirects to finish resolving
+    assert await page.watForXPath(f'//div[.="Welcome, {user.email}!"]')
+```
+
+## CI
+TODO

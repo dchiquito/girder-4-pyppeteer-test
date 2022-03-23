@@ -41,4 +41,4 @@ RUN pyppeteer-install
 
 COPY execute-test-command.sh execute-test-command.sh
 
-ENTRYPOINT ./execute-test-command.sh
+ENTRYPOINT ["/bin/sh", "execute-test-command.sh"]

@@ -175,4 +175,68 @@ async def test_pyppeteer(page, log_in, user, webpack_server):
 ```
 
 ## CI
-TODO
+At this point, you have everything you need to write a test and to run it locally. The last step is to run your tests in CI next to your regular workflow. This can be easily accomplished using the [GitHub Action](github_action.md).
+
+Since pyppeteer tests serve an adjacent purpose to the rest of your pytests, I recommend setting up a separate job to run them rather than simply running them before/after the rest of the `tox` suite. This unfortunately means that much of the backing service configuration needs to be copy/pasted.
+
+Here is an example GitHub workflow:
+```yaml
+name: ci
+on:
+  ... default values ...
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        ...
+      rabbitmq:
+        ...
+      minio:
+        ...
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+      - name: Install tox
+        run: |
+          pip install --upgrade pip
+          pip install tox
+      - name: Run tests
+        run: |
+          tox
+        working-directory: test-app
+        env:
+          DJANGO_DATABASE_URL: postgres://postgres:postgres@localhost:5432/django
+          DJANGO_MINIO_STORAGE_ENDPOINT: localhost:9000
+          DJANGO_MINIO_STORAGE_ACCESS_KEY: minioAccessKey
+          DJANGO_MINIO_STORAGE_SECRET_KEY: minioSecretKey
+  test-pyppeteer:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        ... same as above ...
+      rabbitmq:
+        ... same as above ...
+      minio:
+        ... same as above ...
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        uses: docker://ghcr.io/girder/pytest-pyppeteer:latest
+        with:
+          install_directory: test-client
+          install_command: yarn install
+          test_directory: test-app
+          test_command: tox -e test-pyppeteer
+        env:
+          DJANGO_DATABASE_URL: postgres://postgres:postgres@postgres:5432/django
+          DJANGO_MINIO_STORAGE_ENDPOINT: minio:9000
+          DJANGO_MINIO_STORAGE_ACCESS_KEY: minioAccessKey
+          DJANGO_MINIO_STORAGE_SECRET_KEY: minioSecretKey
+          DJANGO_STORAGE_BUCKET_NAME: integration-test-bucket
+```
+
+You will need to set the values of `install_directory`, `install_command`, `test_directory`, and `test_command` appropriately for your repository.

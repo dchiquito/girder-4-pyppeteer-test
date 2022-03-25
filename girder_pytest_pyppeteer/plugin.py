@@ -49,7 +49,23 @@ def _pyppeteer_config(request):
 
 @pytest.fixture(scope='session')
 def webpack_server(request, _pyppeteer_config, live_server):
-    """Webpack server"""
+    """
+    Run the webpack server in a background process and return the URL.
+    
+    Configuring the server is done via environment variables. Any environment variables prefixed
+    with `PYPPETEER_` have that prefix stripped off, and are then passed to the environment of the
+    background process. Additionally, all of those variables are formatted with the following
+    values:
+
+    Key|Value
+    ---|---
+    `live_server`|`live_server.url`, the URL of the [`live_server` fixture](https://pytest-django.readthedocs.io/en/latest/helpers.html#live-server)
+
+    For example, if `PYPPETEER_VUE_APP_API_URL_ROOT` was set to `{live_server}/api/v3/` in your
+    `tox.ini`, the environment variable `VUE_APP_API_URL_ROOT` might be set to something like
+    `http://localhost:48201/api/v3/` in the webpack server context when tests are run, depending
+    on which port the `live_server` is allocated.
+    """
     skip_if_pyppeteer_disabled(request)
     env = {
         # The path must be passed so that npm/yarn can be found
@@ -167,6 +183,14 @@ async def page(request, _pyppeteer_config):
 
 @pytest.fixture
 def oauth_application(_pyppeteer_config, webpack_server: str):
+    """
+    Set up an OAuth2 Application that serves webpack_server.
+
+    This fixture assumes that you are using the `oauth2_provider` from [django-oauth-toolkit](https://github.com/jazzband/django-oauth-toolkit).
+    It will generate an OAuth Application that is configured to work with the `webpack_server` fixture.
+
+    The `client_id` of the application defaults to `test-oauth-client-id`, but can be overriden by specifying the `PYPPETEER_VUE_APP_OAUTH_CLIENT_ID` environment variable.
+    """
     from oauth2_provider.models import get_application_model
     Application = get_application_model()
     application = Application(
@@ -183,6 +207,17 @@ def oauth_application(_pyppeteer_config, webpack_server: str):
 
 @pytest.fixture
 def page_login(live_server, webpack_server, oauth_application, client):
+    """
+    A function that logs a user into the page.
+    
+    This fixture fakes a login for a given user by generating the cookie that would have been generated from a successful login and setting that cookie directly in the given `page`.
+    
+    Note this fixture will only authenticate the user with the API server. To authenticate with the web client, the full OAuth flow must be completed. This involves the web client redirecting the user to the API server, which sees the injected cookie, generates a session token, and redirects back to the web client, which keeps the session token in local storage.
+
+    The UX of this flow is different for different apps, so it is recommended that you write your own fixture that performs the necessary steps in the web client to initiate/complete the log in process.
+
+    This fixture relies on the `oauth_application` fixture to provide the OAuth Application to log in to.
+    """
     async def _page_login(page, user):
         client.force_login(user)
         sessionid = client.cookies['sessionid'].value

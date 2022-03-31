@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
-        uses: docker://ghcr.io/girder/pytest-pyppeteer:latest
+        uses: docker://ghcr.io/girder/pytest-pyppeteer:{{ gh_action_version() }}
         with:
           install_directory: test-client
           install_command: yarn install

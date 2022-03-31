@@ -14,6 +14,7 @@ pyppeteer = {version = "^1.0.2", optional = true}
 pytest-asyncio = {version = "^0.18.1", optional = true}
 mkdocs = {version = "^1.2.3", extras = ["docs"]}
 mkdocstrings = {version = "^0.18.1", extras = ["docs"]}
+mkdocs-material = {version = "^8.2.8", extras = ["docs"]}
 
 [tool.poetry.extras]
 pyppeteer = [

@@ -1,5 +1,6 @@
 site_name: girder-pytest-pyppeteer
-
+theme:
+  name: material
 plugins:
   - mkdocstrings
 

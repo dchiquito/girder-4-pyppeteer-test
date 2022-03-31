@@ -12,15 +12,21 @@ pytest = "^7.0.1"
 # dependencies to run pyppeteer tests
 pyppeteer = {version = "^1.0.2", optional = true}
 pytest-asyncio = {version = "^0.18.1", optional = true}
-mkdocs = {version = "^1.2.3", extras = ["docs"]}
-mkdocstrings = {version = "^0.18.1", extras = ["docs"]}
-mkdocs-material = {version = "^8.2.8", extras = ["docs"]}
-mkdocs-macros-plugin = {version = "^0.7.0", extras = ["docs"]}
+mkdocs = {version = "^1.3.0", optional = true}
+mkdocstrings = {version = "^0.18.1", optional = true}
+mkdocs-material = {version = "^8.2.8", optional = true}
+mkdocs-macros-plugin = {version = "^0.7.0", optional = true}
 
 [tool.poetry.extras]
 pyppeteer = [
     "pyppeteer",
     "pytest-asyncio"
+]
+docs = [
+    "mkdocs",
+    "mkdocstrings",
+    "mkdocs-material",
+    "mkdocs-macros-plugin"
 ]
 
 [tool.poetry.plugins.pytest11]

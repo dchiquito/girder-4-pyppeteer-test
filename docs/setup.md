@@ -12,14 +12,16 @@ If your project does not match these assumptions, keep in mind that the instruct
 
 ## Installation
 
-##### Add [`girder-pytest-pyppeteer`](https://pypi.org/project/girder-pytest-pyppeteer/) and [`pytest-asyncio`](https://pypi.org/project/pytest-asyncio/) to your project's test dependencies
+### Add [`girder-pytest-pyppeteer`](https://pypi.org/project/girder-pytest-pyppeteer/) and [`pytest-asyncio`](https://pypi.org/project/pytest-asyncio/) to your project's test dependencies
 The tests you will be writing will live next to the rest of your tests, so Pytest needs to have all the fixtures and plugins available when it runs your normal suite of tests.
 
-Installing [`girder-pytest-pyppeteer`](https://pypi.org/project/girder-pytest-pyppeteer/) makes the plugin and fixtures available, but does not actually install [`pyppeteer`](https://github.com/pyppeteer/pyppeteer). To do that, you need to install the extra `girder-pytest-pyppeteer[pyppeteer]`.
+Since `girder-pytest-pyppeteer` is still in its infancy, it's recommended that you pin to `girder-pytest-pyppeteer=={{ poetry_version() }}` to avoid any accidental breaking changes.
+
+Installing [`girder-pytest-pyppeteer`](https://pypi.org/project/girder-pytest-pyppeteer/) makes the plugin and fixtures available, but does not actually install [`pyppeteer`](https://github.com/pyppeteer/pyppeteer). To do that, you need to install the extra `girder-pytest-pyppeteer[pyppeteer]=={{ poetry_version() }}`.
 
 Pyppeteer requires an async runner, so we also install [`pytest-asyncio`](https://pypi.org/project/pytest-asyncio/) to allow Pytest to deal with `async` test functions. You are free to use whatever async runner is convenient, but these instructions will assume `pytest-asyncio`.
 
-##### Add the `test-pyppeteer` tox environment
+### Add the `test-pyppeteer` tox environment
 To run the pyppeteer tests, you will need a new tox environment that looks something like this:
 
 ```toml
@@ -46,7 +48,7 @@ passenv =
     PYPPETEER_BROWSER_HEADLESS
 deps =
     factory-boy
-    girder-pytest-pyppeteer[pyppeteer]
+    girder-pytest-pyppeteer[pyppeteer]=={{ poetry_version() }}
     pytest
     pytest-django
     pytest-factoryboy
@@ -66,7 +68,7 @@ This should be pretty close to your existing `[testenv:test]`, but with some add
 * `DISPLAY=:1` - This was required in my environment (Ubuntu 20.04) for the browser window to render when running locally in non-headless mode. Your mileage may vary.
 * `passenv DJANGO_STORAGE_BUCKET_NAME` - This is the only setting required by the `DevelopmentConfiguration` that isn't included in the normal test configuration. You may need to include more settings here depending on your configuration.
 * `passenv PYPPETEER_BROWSER_HEADLESS` - This is a debugging feature to make it easier to open the Chromium browser in non-headless mode for debugging purposes. The intended usage is to invoke tox with `PYPPETEER_BROWSER_HEADLESS=0 tox -e test-pyppeteer`.
-* `deps = girder-pytest-pyppeteer[pyppeteer]` - This ensures `pyppeteer` is installed, in addition to the pytest plugin.
+* `deps = girder-pytest-pyppeteer[pyppeteer]=={{ poetry_version() }}` - This ensures `pyppeteer` is installed, in addition to the pytest plugin.
 * `pytest -m pyppeteer {posargs}` - This invokes only the tests tagged with `@pytest.mark.pyppeteer`.
 
 This list should be treated as a guide, not a cookiecutter. You will likely need to make some additions, omissions, and modifications to tune your project correctly. If you have any ideas that might apply more generally, issues and PRs are welcome.
@@ -225,7 +227,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
-        uses: docker://ghcr.io/girder/pytest-pyppeteer:latest
+        uses: docker://ghcr.io/girder/pytest-pyppeteer:{{ gh_action_version() }}
         with:
           install_directory: test-client
           install_command: yarn install

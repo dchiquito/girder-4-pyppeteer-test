@@ -3,6 +3,8 @@ theme:
   name: material
 plugins:
   - mkdocstrings
+  - macros:
+      module_name: mkdocs_macro
 
 nav:
   - Home: 'index.md'

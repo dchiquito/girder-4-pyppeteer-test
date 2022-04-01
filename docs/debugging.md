@@ -20,6 +20,23 @@ docker-compose run --rm django tox
 
 This is sadly not supported at this time; you will need to run `tox` natively for pyppeteer to work correctly.
 
+## Why aren't my Celery tasks running?
+There is sadly no way to have Celery tasks run normally (i.e. asynchronously) while running pyppeteer tests. This is a drawback of using the [`live_server`](https://pytest-django.readthedocs.io/en/latest/helpers.html#live-server) fixture. To keep test data atomic, `live_server` wraps the entire test in a transaction so that it can easily reset the database after the test is over. Within the test thread, this is not a huge concern. However, external services like Celery obviously cannot interact with the transaction, so there is no way for Celery tasks to read or write test data.
+
+The workaround is to use [`CELERY_TASK_ALWAYS_EAGER`](https://docs.celeryq.dev/en/stable/userguide/configuration.html#task-always-eager) to force your Celery tasks to execute immediately instead of being queued. Because they execute within the test context, they will be within the bounds of the `live_server` transaction and will be able to read and write test data.
+
+The default configuration specifies `DJANGO_CONFIGURATION = DevelopmentConfiguration` in `tox.ini`. To enable `CELERY_TASK_ALWAYS_EAGER`, you will probably need a new configuration:
+
+```python
+class PyppeteerTestingConfiguration(TestAppMixin, DevelopmentBaseConfiguration):
+    ... copy required config from DevelopmentConfiguration ...
+    CELERY_TASK_ALWAYS_EAGER = True
+```
+
+You can then specify `DJANGO_CONFIGURATION = PyppeteerTestingConfiguration` in your `tox.ini` to use that new configuration in your pyppeteer tests.
+
+Note that any code that `delay`s a task will now block until the task is complete, which may break assumptions.
+
 ## Browser closed unexpectedly: cannot open display
 When running in non-headless mode in Ubuntu, you may encounter this error:
 ```

@@ -1,11 +1,13 @@
 # GitHub Action
-The GitHub Action is provided as a [GitHub package](https://github.com/girder/girder-pytest-pyppeteer/pkgs/container/pytest-pyppeteer) that can be embedded into your GitHub Actions workflow right next to the rest of your CI.
+Tests generally need to be run in two environments: development, and CI. The GitHub Action allows you to easily run your pyppeteer tests in your GitHub CI workflows without having to worry about installing chromium dependencies or logging console errors.
+
+The GitHub Action image is provided as a [GitHub package](https://github.com/girder/girder-pytest-pyppeteer/pkgs/container/pytest-pyppeteer).
 
 ## Normal usage
 
 Pyppeteer tests require a test environment that looks basically the same as the development environment. Fortunately, the [default CI configuration](https://github.com/girder/cookiecutter-girder-4/blob/d1912b887133ae2407277f772f6329c082fafb73/%7B%7B%20cookiecutter.project_slug%20%7D%7D/.github/workflows/ci.yml) already includes the default services (postgres, minio, and rabbitmq), and if your application requires more services you have almost definitely already set them up in CI. You should be able to simply copy/paste your existing CI service definitions into a new job/workflow.
 
-Invoking the GitHub action should look something like this:
+Invoking the GitHub Action should look something like this:
 ```yaml
 name: Example integration tests
 on:
@@ -40,7 +42,7 @@ jobs:
 You can also look at the [test app's workflow](https://github.com/girder/girder-pytest-pyppeteer/blob/main/.github/workflows/example-integration-tests.yml) to see an example that is actually running in the wild.
 
 ## Configuration
-The following (hopefully self-explanatory) inputs are available to the Action:
+The following inputs are available to the Action:
 
 <!-- Disgusting, but required to keep the column width from shrinking into illegibility -->
 Input&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|Example Value&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|Description

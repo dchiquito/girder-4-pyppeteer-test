@@ -12,4 +12,4 @@ nav:
     - 'pytest_plugin.md'
     - 'github_action.md'
   - 'setup.md'
-  - Debugging: 'debugging.md'
+  - Troubleshooting: 'troubleshooting.md'

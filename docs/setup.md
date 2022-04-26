@@ -1,4 +1,4 @@
-# Setup instructions
+# Setup Instructions
 
 ## Prerequisites
 These instructions assume:
@@ -10,14 +10,14 @@ These instructions assume:
 
 If your project does not match these assumptions, keep in mind that the instructions are not tailored for your use case and will likely require some adjustments.
 
-## Installation
+## Installing `girder-pytest-pyppeteer`
 
 ### Add [`girder-pytest-pyppeteer`](https://pypi.org/project/girder-pytest-pyppeteer/) and [`pytest-asyncio`](https://pypi.org/project/pytest-asyncio/) to your project's test dependencies
 The tests you will be writing will live next to the rest of your tests, so Pytest needs to have all the fixtures and plugins available when it runs your normal suite of tests.
 
 Since `girder-pytest-pyppeteer` is still in its infancy, it's recommended that you pin to `girder-pytest-pyppeteer=={{ poetry_version() }}` to avoid any accidental breaking changes.
 
-Installing [`girder-pytest-pyppeteer`](https://pypi.org/project/girder-pytest-pyppeteer/) makes the plugin and fixtures available, but does not actually install [`pyppeteer`](https://github.com/pyppeteer/pyppeteer). To do that, you need to install the extra `girder-pytest-pyppeteer[pyppeteer]=={{ poetry_version() }}`.
+Installing [`girder-pytest-pyppeteer`](https://pypi.org/project/girder-pytest-pyppeteer/) makes the plugin and fixtures available, but does not actually install [`pyppeteer`](https://github.com/pyppeteer/pyppeteer). This is because installing pyppeteer also installs a complete chromium browser, which is a large and unnecessary dependency when running unit tests. Because `girder-pytest-pyppeteer` tests are normal pytest tests like the rest of your unit tests, they still need to loaded by pytest at runtime, even if they are not invoked. To install `pyppeteer`, you need to install the extra `girder-pytest-pyppeteer[pyppeteer]=={{ poetry_version() }}`.
 
 Pyppeteer requires an async runner, so we also install [`pytest-asyncio`](https://pypi.org/project/pytest-asyncio/) to allow Pytest to deal with `async` test functions. You are free to use whatever async runner is convenient, but these instructions will assume `pytest-asyncio`.
 
@@ -76,7 +76,7 @@ This list should be treated as a guide, not a cookiecutter. You will likely need
 ## Writing your first test
 Pyppeteer tests are exactly the same as normal pytest tests, just with some extra bells and whistles.
 
-Here's a simple example of a test for the Kitware homepage:
+To demonstrate the basics, here's a simple example of a test that visits the Kitware homepage and inspects the contents:
 
 ```python
 import pytest
@@ -110,8 +110,8 @@ If you want to see the browser to confirm that it's doing what it says it's doin
 PYPPETEER_BROWSER_HEADLESS=0 tox -e test-pyppeteer
 ```
 
-## The [webpack_server](pytest_plugin.md#webpack_server) fixture
-Now that we have confirmed pyppeteer is working, lets get the frontend plugged in. It should be as simple as:
+## Testing your app
+Now that we have confirmed pyppeteer is working, lets plug in the fronted. It should be as simple as:
 
 ```python
 import pytest
@@ -132,8 +132,8 @@ To your test method, `webpack_server` is simply a string URL pointing to the dev
 
 When you run this test, you should see a `test_screenshot.png` appear in your project root. (Note that running with `PYPPETEER_BROWSER_HEADLESS=0` is generally a much better debugging tool, though.)
 
-## Handling log ins
-We now have a web site to test and a browser to test it with, but there is one more snag you will probably encounter: log ins. Girder 4 apps generally use `oauth2_provider` to handle logins, where the web server delegates to the API server to arbitrate the login process. For `oauth2_provider`, this means you need an OAuth Application model saved in the database which is configured for your specific frontend. Also, different applications have different login UX: OAuth2 providers are different, buttons are different, and signup policies are different. Furthermore, you may want to test different users being logged in to different browsers at different times and in different ways.
+## Handling logins
+We now have a website to test and a browser to test it with, but there is one more snag you will probably encounter: logins. Girder 4 apps generally use `oauth2_provider` to handle logins, where the web server delegates to the API server to arbitrate the login process. For `oauth2_provider`, this means you need an OAuth Application model saved in the database which is configured for your specific frontend. Also, different applications have different login UX: OAuth2 providers are different, buttons are different, and signup policies are different. Furthermore, you may want to test different users being logged in to different browsers at different times and in different ways.
 
 There is no general solution to this problem, but girder-pytest-pyppeteer does provide some tools to help you solve it yourself.
 
@@ -176,7 +176,7 @@ async def test_pyppeteer(page, log_in, user, webpack_server):
     assert await page.watForXPath(f'//div[.="Welcome, {user.email}!"]')
 ```
 
-## CI
+## Running your tests in CI
 At this point, you have everything you need to write a test and to run it locally. The last step is to run your tests in CI next to your regular workflow. This can be easily accomplished using the [GitHub Action](github_action.md).
 
 Since pyppeteer tests serve an adjacent purpose to the rest of your pytests, I recommend setting up a separate job to run them rather than simply running them before/after the rest of the `tox` suite. This unfortunately means that much of the backing service configuration needs to be copy/pasted.

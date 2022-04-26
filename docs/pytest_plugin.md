@@ -1,4 +1,5 @@
-# Pytest fixtures
+# Pytest Fixtures
+The pytest plugin provides a variety of helpful fixtures to streamline the process of setting up a browser and pointing it at your test environment.
 
 ## `webpack_server`
 ### ::: girder_pytest_pyppeteer.plugin.webpack_server

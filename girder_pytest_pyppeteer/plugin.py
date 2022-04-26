@@ -50,7 +50,9 @@ def _pyppeteer_config(request):
 @pytest.fixture(scope='session')
 def webpack_server(request, _pyppeteer_config, live_server):
     """
-    Run the webpack server in a background process and return the URL.
+    The URL of the test frontend.
+
+    Using this fixture has the side affect of starting a node server in a background process.
     
     Configuring the server is done via environment variables. Any environment variables prefixed
     with `PYPPETEER_` have that prefix stripped off, and are then passed to the environment of the
@@ -65,6 +67,11 @@ def webpack_server(request, _pyppeteer_config, live_server):
     `tox.ini`, the environment variable `VUE_APP_API_URL_ROOT` might be set to something like
     `http://localhost:48201/api/v3/` in the webpack server context when tests are run, depending
     on which port the `live_server` is allocated.
+
+    This fixture uses two environment variables when starting the server:
+
+    * **`PYPPETEER_TEST_CLIENT_COMMAND`** - The command to run the server. Generally `npm run serve` or `yarn run serve`.
+    * **`PYPPETEER_TEST_CLIENT_DIR`** - The directory containing the frontend project. `PYPPETEER_TEST_CLIENT_COMMAND` will be run inside this directory.
     """
     skip_if_pyppeteer_disabled(request)
     env = {
@@ -184,7 +191,7 @@ async def page(request, _pyppeteer_config):
 @pytest.fixture
 def oauth_application(_pyppeteer_config, webpack_server: str):
     """
-    Set up an OAuth2 Application that serves webpack_server.
+    An OAuth2 Application that can be used to log in to the `webpack_server`.
 
     This fixture assumes that you are using the `oauth2_provider` from [django-oauth-toolkit](https://github.com/jazzband/django-oauth-toolkit).
     It will generate an OAuth Application that is configured to work with the `webpack_server` fixture.
@@ -214,7 +221,7 @@ def page_login(live_server, webpack_server, oauth_application, client):
     
     Note this fixture will only authenticate the user with the API server. To authenticate with the web client, the full OAuth flow must be completed. This involves the web client redirecting the user to the API server, which sees the injected cookie, generates a session token, and redirects back to the web client, which keeps the session token in local storage.
 
-    The UX of this flow is different for different apps, so it is recommended that you write your own fixture that performs the necessary steps in the web client to initiate/complete the log in process.
+    The UX of this flow is different for different apps, so it is recommended that you write your own fixture that performs the necessary steps in the web client to initiate/complete the login process.
 
     This fixture relies on the `oauth_application` fixture to provide the OAuth Application to log in to.
     """

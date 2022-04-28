@@ -6,6 +6,8 @@ RUN apt-get update && \
         libpq-dev gcc libc6-dev \
         # Required to install node
         curl gnupg \
+        # Include git for packages using setuptools_scm
+        git \
         # Required by pyppeteer
         chromium libxcursor1 libxss1 libpangocairo-1.0-0 libgtk-3-0 && \
     # Install node 17

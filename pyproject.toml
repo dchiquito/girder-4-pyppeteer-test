@@ -2,7 +2,7 @@
 name = "girder-pytest-pyppeteer"
 version = "0.0.11"
 description = "Pytest plugin for using pyppeteer to test Girder 4 applications"
-authors = ["Daniel Chiquito <daniel.chiquito@kitware.com>"]
+authors = ["Kitware, Inc. <kitware@kitware.com>"]
 license = "Apache License 2.0"
 classifiers = ["Framework :: Pytest"]
 

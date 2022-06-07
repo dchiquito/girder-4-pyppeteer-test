@@ -16,7 +16,7 @@ class Image(TimeStampedModel, models.Model):
 
     @property
     def short_checksum(self) -> Optional[str]:
-        return f'{self.checksum[:10]}' if self.checksum else None
+        return f"{self.checksum[:10]}" if self.checksum else None
 
     def compute_checksum(self) -> None:
         hasher = sha512()

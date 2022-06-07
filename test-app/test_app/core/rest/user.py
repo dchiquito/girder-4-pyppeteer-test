@@ -13,16 +13,16 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id',
-            'username',
+            "id",
+            "username",
         ]
 
 
 @swagger_auto_schema(
-    method='GET',
+    method="GET",
     responses={200: UserSerializer},
 )
-@api_view(['GET'])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def users_me_view(request: Request) -> HttpResponseBase:
     """Get the currently authenticated user."""
@@ -31,10 +31,10 @@ def users_me_view(request: Request) -> HttpResponseBase:
 
 
 @swagger_auto_schema(
-    method='POST',
+    method="POST",
     responses={204: no_body},
 )
-@api_view(['POST'])
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def users_logout_view(request: Request) -> HttpResponseBase:
     """Log the user out."""

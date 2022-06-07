@@ -13,8 +13,8 @@ from composed_configuration import (
 
 
 class TestAppMixin(ConfigMixin):
-    WSGI_APPLICATION = 'test_app.wsgi.application'
-    ROOT_URLCONF = 'test_app.urls'
+    WSGI_APPLICATION = "test_app.wsgi.application"
+    ROOT_URLCONF = "test_app.urls"
 
     BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
@@ -22,12 +22,12 @@ class TestAppMixin(ConfigMixin):
     def mutate_configuration(configuration: ComposedConfiguration) -> None:
         # Install local apps first, to ensure any overridden resources are found first
         configuration.INSTALLED_APPS = [
-            'test_app.core.apps.CoreConfig',
+            "test_app.core.apps.CoreConfig",
         ] + configuration.INSTALLED_APPS
 
         # Install additional apps
         configuration.INSTALLED_APPS += [
-            's3_file_field',
+            "s3_file_field",
         ]
 
 

@@ -1,3 +1,3 @@
 from .image import Image
 
-__all__ = ['Image']
+__all__ = ["Image"]

@@ -1,13 +1,13 @@
-from django.conf import settings
-from django.db import migrations, models
 import django.db.models.deletion
 import django_extensions.db.fields
 import s3_file_field.fields
+from django.conf import settings
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
 
-    # This is semantically the "initial" migration, since it creates the first tables
+    # This is semantically the 'initial' migration, since it creates the first tables
     initial = True
 
     dependencies = [
@@ -22,7 +22,10 @@ class Migration(migrations.Migration):
                 (
                     'id',
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name='ID',
                     ),
                 ),
                 (
@@ -49,7 +52,8 @@ class Migration(migrations.Migration):
                 (
                     'owner',
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
                     ),
                 ),
             ],

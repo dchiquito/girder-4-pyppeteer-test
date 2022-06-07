@@ -1,5 +1,4 @@
 from celery import shared_task
-
 from test_app.core.models import Image
 
 

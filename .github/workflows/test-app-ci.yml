@@ -1,4 +1,4 @@
-name: ci
+name: test-app CI
 on:
   push:
   schedule:

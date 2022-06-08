@@ -1,4 +1,4 @@
-name: ci
+name: girder-pytest-pyppeteer CI
 on:
   push:
   schedule:

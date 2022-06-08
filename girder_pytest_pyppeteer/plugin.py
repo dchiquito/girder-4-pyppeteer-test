@@ -1,11 +1,11 @@
-import os
-
 import logging
-import pytest
+import os
 import re
 import shlex
 import signal
 from subprocess import PIPE, Popen, TimeoutExpired
+
+import pytest
 
 log = logging.getLogger('pytest-pyppeteer')
 
@@ -20,9 +20,10 @@ def is_pyppeteer_enabled(request):
 
 
 def skip_if_pyppeteer_disabled(request):
-    """Skip the test if the pyppeteer mark was not specified when invoking pytest"""
+    """Skip the test if the pyppeteer mark was not specified when invoking pytest."""
     if not is_pyppeteer_enabled(request):
         pytest.skip('pyppeteer mark not specified')
+
 
 @pytest.fixture(scope='session')
 def _pyppeteer_config(request):
@@ -36,16 +37,19 @@ def _pyppeteer_config(request):
             'VUE_APP_OAUTH_CLIENT_ID': 'test-oauth-client-id',
             # Any env vars that start with "PYPPETEER_" with the prefix trimmed
             **{
-                key[10:]:value
-                for (key,value) in os.environ.items()
+                key[10:]: value
+                for (key, value) in os.environ.items()
                 if key.startswith('PYPPETEER_')
             },
         }
         required_settings = ['TEST_CLIENT_COMMAND', 'TEST_CLIENT_DIR']
         for required_setting in required_settings:
             if required_setting not in config:
-                pytest.fail(f'Required environment variable PYPPETEER_{required_setting} not defined')
+                pytest.fail(
+                    f'Required environment variable PYPPETEER_{required_setting} not defined'
+                )
         return config
+
 
 @pytest.fixture(scope='session')
 def webpack_server(request, _pyppeteer_config, live_server):
@@ -53,7 +57,7 @@ def webpack_server(request, _pyppeteer_config, live_server):
     The URL of the test frontend.
 
     Using this fixture has the side affect of starting a node server in a background process.
-    
+
     Configuring the server is done via environment variables. Any environment variables prefixed
     with `PYPPETEER_` have that prefix stripped off, and are then passed to the environment of the
     background process. Additionally, all of those variables are formatted with the following
@@ -61,7 +65,8 @@ def webpack_server(request, _pyppeteer_config, live_server):
 
     Key|Value
     ---|---
-    `live_server`|`live_server.url`, the URL of the [`live_server` fixture](https://pytest-django.readthedocs.io/en/latest/helpers.html#live-server)
+    `live_server`|`live_server.url`, the URL of the
+    [`live_server` fixture](https://pytest-django.readthedocs.io/en/latest/helpers.html#live-server)
 
     For example, if `PYPPETEER_VUE_APP_API_URL_ROOT` was set to `{live_server}/api/v3/` in your
     `tox.ini`, the environment variable `VUE_APP_API_URL_ROOT` might be set to something like
@@ -70,8 +75,10 @@ def webpack_server(request, _pyppeteer_config, live_server):
 
     This fixture uses two environment variables when starting the server:
 
-    * **`PYPPETEER_TEST_CLIENT_COMMAND`** - The command to run the server. Generally `npm run serve` or `yarn run serve`.
-    * **`PYPPETEER_TEST_CLIENT_DIR`** - The directory containing the frontend project. `PYPPETEER_TEST_CLIENT_COMMAND` will be run inside this directory.
+    * **`PYPPETEER_TEST_CLIENT_COMMAND`** - The command to run the server. Generally `npm run serve`
+    *   or `yarn run serve`.
+    * **`PYPPETEER_TEST_CLIENT_DIR`** - The directory containing the frontend project.
+    *   `PYPPETEER_TEST_CLIENT_COMMAND` will be run inside this directory.
     """
     skip_if_pyppeteer_disabled(request)
     env = {
@@ -79,7 +86,8 @@ def webpack_server(request, _pyppeteer_config, live_server):
         **{'PATH': os.getenv('PATH')},
         # Pass everything from the pyppeteer config, formatted for the current environment
         **{
-            key:value.format(live_server=live_server.url) for (key, value) in _pyppeteer_config.items()
+            key: value.format(live_server=live_server.url)
+            for (key, value) in _pyppeteer_config.items()
         },
     }
     command = ['/usr/bin/env'] + shlex.split(_pyppeteer_config['TEST_CLIENT_COMMAND'])
@@ -127,7 +135,7 @@ async def page(request, _pyppeteer_config):
 
     Pyppeteer offers a number of arguments to configure the browser during initialization.
     Currently, a subset of these arguments are configurable using environment variables:
-    
+
     Environment Variable|Pyppeteer Equivalent|Values|Default
     ---|---|---|---
     PYPPETEER_BROWSER_IGNORE_HTTPS_ERRORS|ignoreHTTPSErrors|"True"/"1" or "False"/"0"|"True"
@@ -136,12 +144,13 @@ async def page(request, _pyppeteer_config):
     PYPPETEER_BROWSER_HEIGHT|defaultViewport.height|int|800
     PYPPETEER_BROWSER_DUMPIO|dumpio|"True"/"1" or "False"/"0"|"True"
 
-    You can set these in your `tox.ini` `setenv` block, or name them in the `passenv` section and set them manually in the shell prior to running tox.
+    You can set these in your `tox.ini` `setenv` block, or name them in the `passenv` section and
+    set them manually in the shell prior to running tox.
     """
     skip_if_pyppeteer_disabled(request)
-    from pyppeteer.launcher import Launcher
     from pyppeteer.errors import BrowserError
-    import pytest_asyncio
+    from pyppeteer.launcher import Launcher
+    import pytest_asyncio  # noqa: F401
 
     launch_kwargs = {
         'ignoreHTTPSErrors': True,
@@ -150,12 +159,14 @@ async def page(request, _pyppeteer_config):
         'args': ['--no-sandbox'],
         'dumpio': True,
     }
+
     def parse_bool(value):
         if value in ('True', '1'):
             return True
         elif value in ('False', '0'):
             return False
-        raise ValueError(f'invalid boolean: \'{value}\'')
+        raise ValueError(f"invalid boolean: '{value}'")
+
     for key, value in _pyppeteer_config.items():
         if key == 'BROWSER_IGNORE_HTTPS_ERRORS':
             launch_kwargs['ignoreHTTPSErrors'] = parse_bool(value)
@@ -173,8 +184,11 @@ async def page(request, _pyppeteer_config):
         browser = await launcher.launch()
     except BrowserError as e:
         launch_command = ' '.join(launcher.cmd)
-        log.error(f'The pyppeteer browser failed to launch.')
-        log.error(f'You may be able to get more information on the error by starting the browser process yourself:')
+        log.error('The pyppeteer browser failed to launch.')
+        log.error(
+            'You may be able to get more information on the error'
+            ' by starting the browser process yourself:'
+        )
         log.error(launch_command)
 
         raise e
@@ -193,13 +207,17 @@ def oauth_application(_pyppeteer_config, webpack_server: str):
     """
     An OAuth2 Application that can be used to log in to the `webpack_server`.
 
-    This fixture assumes that you are using the `oauth2_provider` from [django-oauth-toolkit](https://github.com/jazzband/django-oauth-toolkit).
-    It will generate an OAuth Application that is configured to work with the `webpack_server` fixture.
+    This fixture assumes that you are using the `oauth2_provider` from
+    [django-oauth-toolkit](https://github.com/jazzband/django-oauth-toolkit).
+    It will generate an OAuth Application that is configured to work with the
+    `webpack_server` fixture.
 
-    The `client_id` of the application defaults to `test-oauth-client-id`, but can be overriden by specifying the `PYPPETEER_VUE_APP_OAUTH_CLIENT_ID` environment variable.
+    The `client_id` of the application defaults to `test-oauth-client-id`, but can be overriden by
+    specifying the `PYPPETEER_VUE_APP_OAUTH_CLIENT_ID` environment variable.
     """
     from oauth2_provider.models import get_application_model
-    Application = get_application_model()
+
+    Application = get_application_model()  # noqa: N806
     application = Application(
         name='test-client-application',
         client_id=_pyppeteer_config['VUE_APP_OAUTH_CLIENT_ID'],
@@ -212,19 +230,28 @@ def oauth_application(_pyppeteer_config, webpack_server: str):
     application.save()
     return application
 
+
 @pytest.fixture
 def page_login(live_server, webpack_server, oauth_application, client):
     """
     A function that logs a user into the page.
-    
-    This fixture fakes a login for a given user by generating the cookie that would have been generated from a successful login and setting that cookie directly in the given `page`.
-    
-    Note this fixture will only authenticate the user with the API server. To authenticate with the web client, the full OAuth flow must be completed. This involves the web client redirecting the user to the API server, which sees the injected cookie, generates a session token, and redirects back to the web client, which keeps the session token in local storage.
 
-    The UX of this flow is different for different apps, so it is recommended that you write your own fixture that performs the necessary steps in the web client to initiate/complete the login process.
+    This fixture fakes a login for a given user by generating the cookie that would have been
+    generated from a successful login and setting that cookie directly in the given `page`.
 
-    This fixture relies on the `oauth_application` fixture to provide the OAuth Application to log in to.
+    Note this fixture will only authenticate the user with the API server. To authenticate with the
+    web client, the full OAuth flow must be completed. This involves the web client redirecting the
+    user to the API server, which sees the injected cookie, generates a session token, and
+    redirects back to the web client, which keeps the session token in local storage.
+
+    The UX of this flow is different for different apps, so it is recommended that you write your
+    own fixture that performs the necessary steps in the web client to initiate/complete the login
+    process.
+
+    This fixture relies on the `oauth_application` fixture to provide the OAuth Application to log
+    in to.
     """
+
     async def _page_login(page, user):
         client.force_login(user)
         sessionid = client.cookies['sessionid'].value
@@ -236,5 +263,6 @@ def page_login(live_server, webpack_server, oauth_application, client):
                 'path': '/',
             }
         )
-        await page.waitFor(2_000) # TODO more reliable wait
+        await page.waitFor(2_000)  # TODO more reliable wait
+
     return _page_login

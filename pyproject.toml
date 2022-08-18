@@ -18,7 +18,7 @@ ignore_missing_imports = true
 
 [tool.poetry]
 name = "girder-pytest-pyppeteer"
-version = "0.0.11"
+version = "0.0.12"
 description = "Pytest plugin for using pyppeteer to test Girder 4 applications"
 authors = ["Kitware, Inc. <kitware@kitware.com>"]
 license = "Apache License 2.0"
